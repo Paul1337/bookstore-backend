@@ -2,9 +2,9 @@ import { IsNotEmpty, Length } from 'class-validator';
 
 export class LogInUserDto {
     @IsNotEmpty()
-    usernameOrEmail: string;
+    emailOrUsername: string;
 
     @IsNotEmpty()
-    @Length(3)
+    @Length(10)
     password: string;
 }

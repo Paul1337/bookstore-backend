@@ -22,17 +22,18 @@ export class AuthService {
     constructor(
         private jwtService: JwtService,
         @InjectRepository(User) private userRepository: Repository<User>,
-        @InjectRepository(UserRoles) private userRolesRepository: Repository<UserRoles>,
-        @InjectRepository(UserRole) private roleRepositor: Repository<UserRole>,
+        // @InjectRepository(UserRoles) private userRolesRepository: Repository<UserRoles>,
+        @InjectRepository(UserRole) private roleRepository: Repository<UserRole>,
     ) {}
 
     async logIn(loginUserDto: LogInUserDto) {
         const user = await this.userRepository
             .createQueryBuilder('user')
-            .leftJoinAndSelect(UserRoles, 'userRole', 'userRole.userId = user.id')
-            .leftJoinAndSelect(UserRole, 'role', 'role.id = userRole.roleId')
+            .leftJoinAndSelect('user.roles', 'role')
+            // .leftJoinAndSelect(UserRoles, 'userRole', 'userRole.userId = user.id')
+            // .leftJoinAndSelect(UserRole, 'role', 'role.id = userRole.roleId')
             .where('user.username = :value or user.email = :value', {
-                value: loginUserDto.usernameOrEmail,
+                value: loginUserDto.emailOrUsername,
             })
             .getOne();
 
@@ -48,7 +49,7 @@ export class AuthService {
             email: user.email,
             username: user.username,
             id: user.id,
-            roles: user.roles,
+            roles: user.roles.map((role) => role.name) as Role[],
         };
 
         return {
@@ -73,18 +74,20 @@ export class AuthService {
             throw new BadRequestException([err]);
         }
 
-        createUserDto.password = bcrypt.hashSync(createUserDto.password, 5);
-        const insertResult = await this.userRepository.insert({
-            email: createUserDto.email,
-            username: createUserDto.username,
-            firstName: createUserDto.firstName,
-            lastName: createUserDto.lastName,
-            password: createUserDto.password,
-        });
-        await this.userRolesRepository.insert({
-            roleId: 0, // user role is the first, maybe something better to put here :)
-            userId: insertResult.identifiers[0].id,
-        });
+        const passwordHash = bcrypt.hashSync(createUserDto.password, 5);
+
+        const newUser = new User();
+        newUser.email = createUserDto.email;
+        newUser.username = createUserDto.username;
+        newUser.firstName = createUserDto.firstName;
+        newUser.lastName = createUserDto.lastName;
+        newUser.password = passwordHash;
+
+        const basicUserRole = await this.roleRepository.findOne({ where: { id: 0 } });
+        newUser.roles.push(basicUserRole);
+
+        await this.userRepository.save(newUser);
+
         return {
             message: 'ok',
         };

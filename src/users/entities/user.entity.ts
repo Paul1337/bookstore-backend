@@ -1,4 +1,3 @@
-import { Role } from 'src/auth/enums/role.enum';
 import {
     Entity,
     Column,
@@ -33,5 +32,5 @@ export class User {
 
     @JoinTable()
     @ManyToMany(() => UserRole)
-    roles: Role[];
+    roles: UserRole[];
 }

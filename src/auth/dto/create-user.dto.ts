@@ -7,7 +7,7 @@ export class CreateUserDto {
     @IsEmail({}, { message: 'email некорректный' })
     email: string;
 
-    @Length(5, undefined, { message: 'пароль должен быть от 10 символов длиной' })
+    @Length(10, undefined, { message: 'пароль должен быть от 10 символов длиной' })
     password: string;
 
     @IsNotEmpty({ message: 'имя не указано' })
