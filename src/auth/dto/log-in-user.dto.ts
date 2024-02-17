@@ -5,6 +5,5 @@ export class LogInUserDto {
     emailOrUsername: string;
 
     @IsNotEmpty()
-    @Length(10)
     password: string;
 }

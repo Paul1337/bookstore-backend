@@ -15,10 +15,14 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({
+        default: '',
+    })
     firstName: string;
 
-    @Column()
+    @Column({
+        default: '',
+    })
     lastName: string;
 
     @Column()

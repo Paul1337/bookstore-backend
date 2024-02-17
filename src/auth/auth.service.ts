@@ -5,24 +5,21 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcrypt';
-import { UsersService } from 'src/users/users.service';
+import { UserRole } from 'src/users/entities/user-role.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LogInUserDto } from './dto/log-in-user.dto';
-import { UserPayloadScheme } from './lib/request-extension';
 import { Role } from './enums/role.enum';
-import { Repository } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
-import { UserRoles } from 'src/users/entities/user-roles.entity';
-import { UserRole } from 'src/users/entities/user-role.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { UserPayloadScheme } from './lib/request-extension';
 
 @Injectable()
 export class AuthService {
     constructor(
         private jwtService: JwtService,
         @InjectRepository(User) private userRepository: Repository<User>,
-        // @InjectRepository(UserRoles) private userRolesRepository: Repository<UserRoles>,
         @InjectRepository(UserRole) private roleRepository: Repository<UserRole>,
     ) {}
 
@@ -38,18 +35,18 @@ export class AuthService {
             .getOne();
 
         if (!user) {
-            throw new ForbiddenException(`User not found`);
+            throw new ForbiddenException(`Пользователь не найден`);
         }
 
         if (!bcrypt.compareSync(loginUserDto.password, user.password)) {
-            throw new ForbiddenException('Password is not correct');
+            throw new ForbiddenException('Пароль неверный');
         }
 
         const payload: UserPayloadScheme = {
             email: user.email,
             username: user.username,
             id: user.id,
-            roles: user.roles.map((role) => role.name) as Role[],
+            roles: user.roles.map(role => role.name) as Role[],
         };
 
         return {
@@ -71,7 +68,7 @@ export class AuthService {
                 users[0].username === createUserDto.username
                     ? `Пользователь с username ${createUserDto.username} уже существует`
                     : `Пользователь с email ${createUserDto.email} уже существует`;
-            throw new BadRequestException([err]);
+            throw new BadRequestException(err);
         }
 
         const passwordHash = bcrypt.hashSync(createUserDto.password, 5);
@@ -79,12 +76,10 @@ export class AuthService {
         const newUser = new User();
         newUser.email = createUserDto.email;
         newUser.username = createUserDto.username;
-        newUser.firstName = createUserDto.firstName;
-        newUser.lastName = createUserDto.lastName;
         newUser.password = passwordHash;
 
         const basicUserRole = await this.roleRepository.findOne({ where: { id: 0 } });
-        newUser.roles.push(basicUserRole);
+        newUser.roles = [basicUserRole];
 
         await this.userRepository.save(newUser);
 
