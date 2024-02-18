@@ -78,7 +78,8 @@ export class AuthService {
         newUser.username = createUserDto.username;
         newUser.password = passwordHash;
 
-        const basicUserRole = await this.roleRepository.findOne({ where: { id: 0 } });
+        const basicUserRole = await this.roleRepository.findOne({ where: { id: 1 } });
+        console.log('basic user role', basicUserRole);
         newUser.roles = [basicUserRole];
 
         await this.userRepository.save(newUser);

@@ -8,7 +8,6 @@ import {
     JoinTable,
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
-import { UserRoles } from './user-roles.entity';
 
 @Entity()
 export class User {
@@ -34,7 +33,9 @@ export class User {
     @Column()
     password: string;
 
-    @JoinTable()
+    @JoinTable({
+        name: 'user_roles',
+    })
     @ManyToMany(() => UserRole)
     roles: UserRole[];
 }
