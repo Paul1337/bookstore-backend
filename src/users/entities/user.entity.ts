@@ -8,34 +8,32 @@ import {
     JoinTable,
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
+import { Book } from 'src/books/entities/book.entity';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ type: 'int4' })
     id: number;
 
-    @Column({
-        default: '',
-    })
+    @Column({ type: 'varchar', length: 64, default: '' })
     firstName: string;
 
-    @Column({
-        default: '',
-    })
+    @Column({ type: 'varchar', length: 64, default: '' })
     lastName: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 64 })
     email: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 64 })
     username: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 1024 })
     password: string;
 
-    @JoinTable({
-        name: 'user_roles',
-    })
+    @JoinTable({ name: 'user_roles' })
     @ManyToMany(() => UserRole)
     roles: UserRole[];
+
+    @OneToMany(() => Book, (book) => book.author)
+    books: Book[];
 }
