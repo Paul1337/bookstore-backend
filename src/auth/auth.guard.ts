@@ -31,7 +31,7 @@ export class AuthGuard implements CanActivate {
         const userPayload = await this.authService.verifyToken(token);
         request['user'] = userPayload;
 
-        if (!requiredRoles) return true;
-        return requiredRoles.some(role => userPayload.roles.includes(role));
+        if (!requiredRoles) return false;
+        return requiredRoles.some((role) => userPayload.roles.includes(role));
     }
 }
