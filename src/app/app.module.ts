@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import path from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { BooksModule } from 'src/books/books.module';
 
 @Module({
     imports: [
@@ -18,7 +17,6 @@ import { User } from 'src/users/entities/user.entity';
                 username: config.get('DB_USER'),
                 password: config.get('DB_PASSWORD'),
                 database: 'bookstore',
-                // entities: [User],
                 autoLoadEntities: true,
                 synchronize: true,
             }),
@@ -30,6 +28,7 @@ import { User } from 'src/users/entities/user.entity';
         }),
         AuthModule,
         UsersModule,
+        BooksModule,
     ],
     controllers: [AppController],
     providers: [AppService],

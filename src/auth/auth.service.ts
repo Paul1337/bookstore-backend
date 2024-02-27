@@ -27,8 +27,6 @@ export class AuthService {
         const user = await this.userRepository
             .createQueryBuilder('user')
             .leftJoinAndSelect('user.roles', 'role')
-            // .leftJoinAndSelect(UserRoles, 'userRole', 'userRole.userId = user.id')
-            // .leftJoinAndSelect(UserRole, 'role', 'role.id = userRole.roleId')
             .where('user.username = :value or user.email = :value', {
                 value: loginUserDto.emailOrUsername,
             })

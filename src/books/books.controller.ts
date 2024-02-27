@@ -12,22 +12,24 @@ export class BooksController {
 
     @Get(':bookId')
     @Public()
-    async getBook(@Req() request: RequestExtended, @Param('bookId') bookId) {}
+    async getBookInfo(@Req() request: RequestExtended, @Param('bookId') bookId) {
+        return this.booksService.getBookInfo(bookId);
+    }
 
-    @Post(':bookId/like')
+    @Post(':bookId/star')
     @Roles(Role.User)
-    async likeBook(@Req() request: RequestExtended) {
+    async starBook(@Req() request: RequestExtended) {
         const userId = request.user?.id;
     }
 
     @Post('search')
     @Public()
     async searchBook(@Req() request: RequestExtended, @Body() searchBookDto: SearchBookDto) {
-        const userId = request.user?.id;
-        if (userId) {
-            // some pattern for private users (we can search accroding to specific user parametrs)
-        } else {
-            // some common search pattern
-        }
+        // const userId = request.user?.id;
+        // if (userId) {
+        //     // some pattern for private users (we can search accroding to specific user parametrs)
+        // } else {
+        //     // some common search pattern
+        // }
     }
 }

@@ -34,6 +34,6 @@ export class User {
     @ManyToMany(() => UserRole)
     roles: UserRole[];
 
-    @OneToMany(() => Book, (book) => book.author)
+    @OneToMany(() => Book, book => book.author)
     books: Book[];
 }

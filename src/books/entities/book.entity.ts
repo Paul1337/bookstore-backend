@@ -14,13 +14,13 @@ export class Book {
     id: number;
 
     @Column({ type: 'varchar', length: 64 })
-    name: string;
+    title: string;
 
     @Column({ type: 'varchar', length: 64 })
     description: string;
 
     @Column({ type: 'int4' })
-    likesCount: number;
+    starsCount: number;
 
     @Column({ type: 'int4' })
     viewsCount: number;
@@ -28,7 +28,7 @@ export class Book {
     @Column({ type: 'int4' })
     rewardsCount: number;
 
-    @ManyToOne(() => User, (user) => user.books)
+    @ManyToOne(() => User, user => user.books)
     author: User;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
