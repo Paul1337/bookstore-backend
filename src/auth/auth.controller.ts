@@ -4,6 +4,8 @@ import { Public } from './decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LogInUserDto } from './dto/log-in-user.dto';
 import { RequestExtended } from './lib/request-extension';
+import { Roles } from './decorators/roles.decorator';
+import { AllRoles } from './enums/role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +24,7 @@ export class AuthController {
     }
 
     @Post('/me')
+    @Roles(...AllRoles)
     async init(@Req() req: RequestExtended) {
         if (req['user']) {
             return req['user'];

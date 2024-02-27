@@ -7,6 +7,8 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
+import { BookStatus } from '../enums/book-status.enum';
+import { BookSeries } from './book-series.entity';
 
 @Entity()
 export class Book {
@@ -31,9 +33,45 @@ export class Book {
     @ManyToOne(() => User, user => user.books)
     author: User;
 
-    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+    @Column({ type: 'timestamp' })
     createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+    @Column({ type: 'timestamp' })
     updatedAt: Date;
+
+    @Column({ type: 'int4' })
+    addsToLibraryCount: number;
+
+    @Column({ type: 'varchar', length: 64 })
+    backgroundSrc: string;
+
+    @Column({ type: 'varchar', length: 64 })
+    coverSrc: string;
+
+    @Column({ type: 'int4' })
+    cost: number;
+
+    @Column({ type: 'int4' })
+    freeChaptersCount: number;
+
+    @Column({ type: 'varchar', length: 64 })
+    status: BookStatus;
+
+    @Column({ type: 'bool' })
+    isPublished: boolean;
+
+    @Column({ type: 'bool' })
+    isBanned: boolean;
+
+    @Column({ type: 'varchar', length: 32 })
+    ageRestriction: string;
+
+    @ManyToOne(() => BookSeries, series => series.id)
+    series: BookSeries;
+
+    // @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+    // createdAt: Date;
+
+    // @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+    // updatedAt: Date;
 }
