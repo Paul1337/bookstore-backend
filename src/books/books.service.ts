@@ -29,5 +29,6 @@ export class BooksService {
     }
 
     async starBook(bookId: number, userId: number) {}
+
     async searchBook(searchBookDto: SearchBookDto) {}
 }

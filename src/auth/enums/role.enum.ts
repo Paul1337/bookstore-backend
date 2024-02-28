@@ -3,4 +3,4 @@ export enum Role {
     Admin = 'admin',
 }
 
-export const AllRoles = [Role.User, Role.Admin];
+export const AllRoles = Object.values(Role);

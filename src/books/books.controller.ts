@@ -18,8 +18,8 @@ export class BooksController {
 
     @Post(':bookId/star')
     @Roles(Role.User)
-    async starBook(@Req() request: RequestExtended) {
-        const userId = request.user?.id;
+    async starBook(@Req() request: RequestExtended, @Param('bookId') bookId) {
+        return this.booksService.starBook(bookId, request.user.id);
     }
 
     @Post('search')

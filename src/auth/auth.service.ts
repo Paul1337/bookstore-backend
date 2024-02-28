@@ -13,7 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LogInUserDto } from './dto/log-in-user.dto';
 import { Role } from './enums/role.enum';
 import { UserPayloadScheme } from './lib/request-extension';
-import { UserRole } from 'src/users/entities/role';
+import { UserRole } from 'src/users/entities/user-role.entity';
 
 @Injectable()
 export class AuthService {
@@ -44,7 +44,7 @@ export class AuthService {
             email: user.email,
             username: user.username,
             id: user.id,
-            roles: user.roles.map(UserRole => UserRole.name) as Role[],
+            roles: user.roles.map((UserRole) => UserRole.name) as Role[],
         };
 
         return {

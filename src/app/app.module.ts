@@ -6,6 +6,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BooksModule } from 'src/books/books.module';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { BooksModule } from 'src/books/books.module';
                 database: 'bookstore',
                 autoLoadEntities: true,
                 synchronize: true,
+                namingStrategy: new SnakeNamingStrategy(),
             }),
             imports: [ConfigModule],
             inject: [ConfigService],
