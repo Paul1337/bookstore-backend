@@ -10,7 +10,7 @@ export class BookSeries {
     @Column({ type: 'varchar', length: 64 })
     name: string;
 
-    @ManyToOne(() => User, user => user.books)
+    @ManyToOne(() => User, user => user.writtenBooks)
     author: User;
 
     @OneToMany(() => Book, book => book.series)

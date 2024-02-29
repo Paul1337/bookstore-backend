@@ -6,8 +6,10 @@ import { LogInUserDto } from './dto/log-in-user.dto';
 import { RequestExtended } from './lib/request-extension';
 import { Roles } from './decorators/roles.decorator';
 import { AllRoles } from './enums/role.enum';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 

@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
 import { Book } from 'src/books/entities/book.entity';
+import { UserBooks } from 'src/books/entities/user-books.entity';
 
 @Entity()
 export class User {
@@ -34,10 +35,6 @@ export class User {
     @ManyToMany(() => UserRole)
     roles: UserRole[];
 
-    @OneToMany(() => Book, (book) => book.author)
-    books: Book[];
-
-    @JoinTable({ name: 'user_stars' })
-    @ManyToMany(() => Book)
-    starredBooks: Book[];
+    @OneToMany(type => Book, book => book.author)
+    writtenBooks: Book[];
 }

@@ -22,8 +22,8 @@ export class Book {
     @Column({ type: 'varchar', length: 64 })
     description: string;
 
-    @Column({ type: 'int4' })
-    starsCount: number;
+    // @Column({ type: 'int4' })
+    // starsCount: number;
 
     @Column({ type: 'int4' })
     viewsCount: number;
@@ -31,7 +31,7 @@ export class Book {
     @Column({ type: 'int4' })
     rewardsCount: number;
 
-    @ManyToOne(() => User, (user) => user.books)
+    @ManyToOne(() => User, user => user.writtenBooks)
     author: User;
 
     @Column({ type: 'timestamp' })
@@ -67,11 +67,11 @@ export class Book {
     @Column({ type: 'varchar', length: 32 })
     ageRestriction: string;
 
-    @ManyToOne(() => BookSeries, (series) => series.id)
+    @ManyToOne(() => BookSeries, series => series.id)
     series: BookSeries;
 
-    @ManyToMany(() => User, (user) => user.starredBooks)
-    starredUsers: User[];
+    // @ManyToMany(() => User, (user) => user.starredBooks)
+    // starredUsers: User[];
 
     // @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
     // createdAt: Date;

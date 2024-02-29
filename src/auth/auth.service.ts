@@ -44,7 +44,7 @@ export class AuthService {
             email: user.email,
             username: user.username,
             id: user.id,
-            roles: user.roles.map((UserRole) => UserRole.name) as Role[],
+            roles: user.roles.map(UserRole => UserRole.name) as Role[],
         };
 
         return {
@@ -91,13 +91,15 @@ export class AuthService {
         return type === 'Bearer' ? token : undefined;
     }
 
-    async verifyToken(token: string): Promise<UserPayloadScheme> {
+    async verifyToken(token: string, strict: boolean = true): Promise<UserPayloadScheme> {
         try {
             const payload = await this.jwtService.verifyAsync(token);
             return payload;
         } catch (err) {
             console.log(err);
-            throw new UnauthorizedException();
+            if (strict) {
+                throw new UnauthorizedException();
+            }
         }
     }
 }
