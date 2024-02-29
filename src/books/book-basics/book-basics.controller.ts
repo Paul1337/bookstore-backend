@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Post, Req } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
@@ -13,7 +13,13 @@ export class BookBasicsController {
 
     @Get(':bookId')
     @Public()
-    async getBookInfo(@Req() request: RequestExtended, @Param('bookId') bookId) {
+    @ApiOperation({
+        summary: 'Получение общей информации о книги. Для авторизованных пользователей доп информация.',
+    })
+    async getBookInfo(
+        @Req() request: RequestExtended,
+        @Param('bookId', new ParseIntPipe()) bookId: number,
+    ) {
         if (request.user) {
             return this.bookBasicsService.getBookPrivateInfo(bookId, request.user.id);
         } else {
@@ -23,25 +29,49 @@ export class BookBasicsController {
 
     @Post(':bookId/star')
     @Roles(Role.User)
-    async starBook(@Req() request: RequestExtended, @Param('bookId') bookId) {
+    @ApiOperation({
+        summary: 'Оценивание (лайк) книги',
+    })
+    async starBook(
+        @Req() request: RequestExtended,
+        @Param('bookId', new ParseIntPipe()) bookId: number,
+    ) {
         return this.bookBasicsService.starBook(bookId, request.user.id);
     }
 
     @Post(':bookId/unstar')
     @Roles(Role.User)
-    async unstarBook(@Req() request: RequestExtended, @Param('bookId') bookId) {
+    @ApiOperation({
+        summary: 'Отмена оценивания (лайка) книги',
+    })
+    async unstarBook(
+        @Req() request: RequestExtended,
+        @Param('bookId', new ParseIntPipe()) bookId: number,
+    ) {
         return this.bookBasicsService.unstarBook(bookId, request.user.id);
     }
 
     @Post(':bookId/addToLibrary')
     @Roles(Role.User)
-    async addToLibrary(@Req() request: RequestExtended, @Param('bookId') bookId) {
+    @ApiOperation({
+        summary: 'Добавление в библиотеку пользователя',
+    })
+    async addToLibrary(
+        @Req() request: RequestExtended,
+        @Param('bookId', new ParseIntPipe()) bookId: number,
+    ) {
         return this.bookBasicsService.addBookToLibrary(bookId, request.user.id);
     }
 
     @Post(':bookId/removeFromLibrary')
     @Roles(Role.User)
-    async removeFromLibrary(@Req() request: RequestExtended, @Param('bookId') bookId) {
+    @ApiOperation({
+        summary: 'Удаление из библиотеки пользователя',
+    })
+    async removeFromLibrary(
+        @Req() request: RequestExtended,
+        @Param('bookId', new ParseIntPipe()) bookId: number,
+    ) {
         return this.bookBasicsService.removeBookFromLibrary(bookId, request.user.id);
     }
 
