@@ -24,7 +24,14 @@ export class UsersController {
     @ApiOperation({
         summary: 'Загрузить фотографию профиля пользователя',
     })
-    @UseInterceptors(FileInterceptor('file', { dest: '../static/uploads' }))
+    @UseInterceptors(
+        FileInterceptor('file', {
+            dest: '../static/uploads',
+            limits: {
+                fileSize: 100 * 1024 * 1024,
+            },
+        }),
+    )
     async uploadUserImage(@Req() req: RequestExtended, @UploadedFile() userImg: Express.Multer.File) {
         console.log('uploaded user image', userImg);
         const correctedPath = userImg.path.substring(userImg.path.indexOf('/'));
@@ -37,7 +44,14 @@ export class UsersController {
     @ApiOperation({
         summary: 'Загрузить фотографию фона профиля',
     })
-    @UseInterceptors(FileInterceptor('file', { dest: '../static/uploads' }))
+    @UseInterceptors(
+        FileInterceptor('file', {
+            dest: '../static/uploads',
+            limits: {
+                fileSize: 100 * 1024 * 1024,
+            },
+        }),
+    )
     async uploadBackgroundImage(
         @Req() req: RequestExtended,
         @UploadedFile() backgroundImg: Express.Multer.File,

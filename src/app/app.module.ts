@@ -7,9 +7,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BooksModule } from 'src/books/books.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import path from 'path';
 
 @Module({
     imports: [
+        ServeStaticModule.forRoot({
+            rootPath: path.join(__dirname, '../..', 'static'),
+            renderPath: '/',
+        }),
         TypeOrmModule.forRootAsync({
             useFactory: (config: ConfigService) => ({
                 type: 'postgres',

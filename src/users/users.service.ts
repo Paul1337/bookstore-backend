@@ -39,14 +39,6 @@ export class UsersService {
         });
         user.profile.userImg = userImg;
         await this.userRepository.save(user);
-        // await this.userRepository
-        //     .createQueryBuilder()
-        //     .relation(User, 'profile')
-        //     .of(userId)
-        //     .update({
-        //         profile: { userImg },
-        //     })
-        //     .execute();
     }
 
     async updateBackgroundImg(userId: number, backgroundImg: string) {
