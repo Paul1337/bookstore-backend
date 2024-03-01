@@ -22,16 +22,19 @@ export class AuthGuard implements CanActivate {
             context.getClass(),
         ]);
 
-        if (isPublic) return true;
-
         const request = context.switchToHttp().getRequest();
         const token = this.authService.extractAuthTokenFromHeader(request.headers.authorization);
-        if (!token) throw new UnauthorizedException();
 
-        const userPayload = await this.authService.verifyToken(token);
-        request['user'] = userPayload;
+        if (token) {
+            const userPayload = await this.authService.verifyToken(token, !isPublic);
+            request['user'] = userPayload;
 
-        if (!requiredRoles) return false;
-        return requiredRoles.some((role) => userPayload.roles.includes(role));
+            if (isPublic) return true;
+            if (!requiredRoles) return false;
+            return requiredRoles.some(role => userPayload.roles.includes(role));
+        } else {
+            if (!isPublic) throw new UnauthorizedException();
+            return isPublic;
+        }
     }
 }

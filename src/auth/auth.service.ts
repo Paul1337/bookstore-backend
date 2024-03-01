@@ -7,28 +7,26 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcrypt';
-import { UserRole } from 'src/users/entities/user-role.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LogInUserDto } from './dto/log-in-user.dto';
 import { Role } from './enums/role.enum';
 import { UserPayloadScheme } from './lib/request-extension';
+import { UserRole } from 'src/users/entities/user-role.entity';
 
 @Injectable()
 export class AuthService {
     constructor(
         private jwtService: JwtService,
         @InjectRepository(User) private userRepository: Repository<User>,
-        @InjectRepository(UserRole) private roleRepository: Repository<UserRole>,
+        @InjectRepository(UserRole) private UserRoleRepository: Repository<UserRole>,
     ) {}
 
     async logIn(loginUserDto: LogInUserDto) {
         const user = await this.userRepository
             .createQueryBuilder('user')
-            .leftJoinAndSelect('user.roles', 'role')
-            // .leftJoinAndSelect(UserRoles, 'userRole', 'userRole.userId = user.id')
-            // .leftJoinAndSelect(UserRole, 'role', 'role.id = userRole.roleId')
+            .leftJoinAndSelect('user.roles', 'UserRole')
             .where('user.username = :value or user.email = :value', {
                 value: loginUserDto.emailOrUsername,
             })
@@ -46,7 +44,7 @@ export class AuthService {
             email: user.email,
             username: user.username,
             id: user.id,
-            roles: user.roles.map(role => role.name) as Role[],
+            roles: user.roles.map(UserRole => UserRole.name) as Role[],
         };
 
         return {
@@ -78,8 +76,7 @@ export class AuthService {
         newUser.username = createUserDto.username;
         newUser.password = passwordHash;
 
-        const basicUserRole = await this.roleRepository.findOne({ where: { id: 1 } });
-        console.log('basic user role', basicUserRole);
+        const basicUserRole = await this.UserRoleRepository.findOne({ where: { name: Role.User } });
         newUser.roles = [basicUserRole];
 
         await this.userRepository.save(newUser);
@@ -94,13 +91,15 @@ export class AuthService {
         return type === 'Bearer' ? token : undefined;
     }
 
-    async verifyToken(token: string): Promise<UserPayloadScheme> {
+    async verifyToken(token: string, strict: boolean = true): Promise<UserPayloadScheme> {
         try {
             const payload = await this.jwtService.verifyAsync(token);
             return payload;
         } catch (err) {
             console.log(err);
-            throw new UnauthorizedException();
+            if (strict) {
+                throw new UnauthorizedException();
+            }
         }
     }
 }

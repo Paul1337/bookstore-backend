@@ -8,21 +8,11 @@ import { Repository } from 'typeorm';
 export class UsersService {
     constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
 
-    // async findAll() {
-    //     return await this.userRepository.find();
-    // }
-
-    // async findOne(searchFields: Record<string, string>) {
-    //     return this.userRepository.findOne(searchFields);
-    // }
-
-    // async createOne(createUserDto: CreateUserDto) {
-    //     await this.userRepository.insert({
-    //         email: createUserDto.email,
-    //         username: createUserDto.username,
-    //         firstName: createUserDto.firstName,
-    //         lastName: createUserDto.lastName,
-    //         password: createUserDto.password,
-    //     });
-    // }
+    async findById(userId: number) {
+        return this.userRepository.findOne({
+            where: {
+                id: userId,
+            },
+        });
+    }
 }

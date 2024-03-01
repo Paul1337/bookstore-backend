@@ -1,0 +1,89 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Book } from '../entities/book.entity';
+import { Repository } from 'typeorm';
+import { UserBooks } from '../entities/user-books.entity';
+import { UsersService } from 'src/users/users.service';
+import { BooksLibService } from '../lib/books-lib.service';
+import { GetPublicBookInfoResponse } from './responses/get-public-book-info.response';
+import { GetPrivateBookInfoResponse } from './responses/get-private-book-info.response';
+
+@Injectable()
+export class BookBasicsService {
+    constructor(
+        @InjectRepository(Book) private bookRepository: Repository<Book>,
+        @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
+        private bookLibService: BooksLibService,
+        // private userService: UsersService,
+    ) {}
+
+    async getBookPublicInfo(bookId: number): Promise<GetPublicBookInfoResponse> {
+        const bookWithRelations = await this.bookRepository.findOne({
+            where: { id: bookId },
+            relations: ['author', 'series'],
+        });
+
+        return {
+            id: bookWithRelations.id,
+            title: bookWithRelations.title,
+            description: bookWithRelations.description,
+            viewsCount: bookWithRelations.viewsCount,
+            rewardsCount: bookWithRelations.rewardsCount,
+            author: {
+                username: bookWithRelations.author.username,
+                id: bookWithRelations.author.id,
+                firstName: bookWithRelations.author.firstName,
+                lastName: bookWithRelations.author.lastName,
+            },
+            createdAt: bookWithRelations.createdAt,
+            updatedAt: bookWithRelations.updatedAt,
+            addsToLibraryCount: bookWithRelations.addsToLibraryCount,
+            backgroundSrc: bookWithRelations.backgroundSrc,
+            coverSrc: bookWithRelations.coverSrc,
+            cost: bookWithRelations.cost,
+            freeChaptersCount: bookWithRelations.freeChaptersCount,
+            status: bookWithRelations.status,
+            isPublished: bookWithRelations.isPublished,
+            isBanned: bookWithRelations.isBanned,
+            ageRestriction: bookWithRelations.ageRestriction,
+            series: bookWithRelations.series,
+        };
+    }
+
+    async getBookPrivateInfo(bookId: number, userId: number): Promise<GetPrivateBookInfoResponse> {
+        const publicBookInfo = await this.getBookPublicInfo(bookId);
+        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+
+        return {
+            ...publicBookInfo,
+            isStarred: bookInfo.isStarred,
+            isInLibrary: bookInfo.isInLibrary,
+            currentPage: bookInfo.currentPage,
+        };
+    }
+
+    async starBook(bookId: number, userId: number) {
+        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+
+        bookInfo.isStarred = true;
+        await this.userBooksRepository.save(bookInfo);
+    }
+
+    async unstarBook(bookId: number, userId: number) {
+        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+        bookInfo.isStarred = false;
+        await this.userBooksRepository.save(bookInfo);
+    }
+
+    async addBookToLibrary(bookId: number, userId: number) {
+        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+        bookInfo.isInLibrary = true;
+        await this.userBooksRepository.save(bookInfo);
+    }
+
+    async removeBookFromLibrary(bookId: number, userId: number) {
+        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+        bookInfo.isInLibrary = false;
+        await this.userBooksRepository.save(bookInfo);
+    }
+}
