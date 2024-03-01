@@ -6,7 +6,7 @@ import { LogInUserDto } from './dto/log-in-user.dto';
 import { RequestExtended } from './lib/request-extension';
 import { Roles } from './decorators/roles.decorator';
 import { AllRoles } from './enums/role.enum';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -15,18 +15,27 @@ export class AuthController {
 
     @Post('/login')
     @Public()
+    @ApiOperation({
+        summary: 'Вход пользователя',
+    })
     async logIn(@Body() logInDto: LogInUserDto) {
         return this.authService.logIn(logInDto);
     }
 
     @Post('/reg')
     @Public()
+    @ApiOperation({
+        summary: 'Регистрация пользователя',
+    })
     async register(@Body() createUserDto: CreateUserDto) {
         return this.authService.register(createUserDto);
     }
 
     @Post('/me')
     @Roles(...AllRoles)
+    @ApiOperation({
+        summary: 'Получение первичных данных пользователя, если неавторизован - вернёт ошибку',
+    })
     async init(@Req() req: RequestExtended) {
         if (req['user']) {
             return req['user'];
