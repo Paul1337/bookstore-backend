@@ -31,28 +31,28 @@ export class Book {
     @Column({ type: 'int4' })
     rewardsCount: number;
 
-    @ManyToOne(() => User, user => user.writtenBooks)
-    author: User;
+    @ManyToOne(() => User, (user) => user.writtenBooks)
+    author?: User;
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamp', nullable: true })
     createdAt: Date;
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamp', nullable: true })
     updatedAt: Date;
 
     @Column({ type: 'int4' })
     addsToLibraryCount: number;
 
-    @Column({ type: 'varchar', length: 64 })
+    @Column({ type: 'varchar', length: 64, nullable: true })
     backgroundSrc: string;
 
-    @Column({ type: 'varchar', length: 64 })
+    @Column({ type: 'varchar', length: 64, nullable: true })
     coverSrc: string;
 
-    @Column({ type: 'int4' })
+    @Column({ type: 'int4', nullable: true })
     cost: number;
 
-    @Column({ type: 'int4' })
+    @Column({ type: 'int4', nullable: true })
     freeChaptersCount: number;
 
     @Column({ type: 'varchar', length: 64 })
@@ -67,8 +67,8 @@ export class Book {
     @Column({ type: 'varchar', length: 32 })
     ageRestriction: string;
 
-    @ManyToOne(() => BookSeries, series => series.id)
-    series: BookSeries;
+    @ManyToOne(() => BookSeries, (series) => series.id)
+    series?: BookSeries;
 
     // @ManyToMany(() => User, (user) => user.starredBooks)
     // starredUsers: User[];

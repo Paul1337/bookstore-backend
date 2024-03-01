@@ -33,8 +33,11 @@ export class User {
 
     @JoinTable({ name: 'user_roles' })
     @ManyToMany(() => UserRole)
+    // {
+    //     eager: true,
+    // })
     roles: UserRole[];
 
-    @OneToMany(type => Book, book => book.author)
-    writtenBooks: Book[];
+    @OneToMany((type) => Book, (book) => book.author)
+    writtenBooks?: Book[];
 }
