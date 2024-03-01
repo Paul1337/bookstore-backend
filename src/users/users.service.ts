@@ -33,24 +33,28 @@ export class UsersService {
     }
 
     async updateUserImg(userId: number, userImg: string) {
-        await this.userRepository
-            .createQueryBuilder()
-            .relation(User, 'profile')
-            .of(userId)
-            .update({
-                profile: { userImg },
-            })
-            .execute();
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['profile'],
+        });
+        user.profile.userImg = userImg;
+        await this.userRepository.save(user);
+        // await this.userRepository
+        //     .createQueryBuilder()
+        //     .relation(User, 'profile')
+        //     .of(userId)
+        //     .update({
+        //         profile: { userImg },
+        //     })
+        //     .execute();
     }
 
     async updateBackgroundImg(userId: number, backgroundImg: string) {
-        await this.userRepository
-            .createQueryBuilder()
-            .relation(User, 'profile')
-            .of(userId)
-            .update({
-                profile: { backgroundImg },
-            })
-            .execute();
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['profile'],
+        });
+        user.profile.backgroundImg = backgroundImg;
+        await this.userRepository.save(user);
     }
 }
