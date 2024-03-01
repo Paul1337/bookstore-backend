@@ -6,10 +6,12 @@ import {
     OneToMany,
     ManyToMany,
     JoinTable,
+    OneToOne,
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
 import { Book } from 'src/books/entities/book.entity';
 import { UserBooks } from 'src/books/entities/user-books.entity';
+import { UserProfile } from './user-profile.entity';
 
 @Entity()
 export class User {
@@ -38,6 +40,15 @@ export class User {
     // })
     roles: UserRole[];
 
-    @OneToMany((type) => Book, (book) => book.author)
+    @Column({ type: 'bool' })
+    isBanned: boolean;
+
+    @OneToMany(type => Book, book => book.author)
     writtenBooks?: Book[];
+
+    @OneToOne(type => UserProfile, {
+        cascade: ['update', 'insert'],
+    })
+    @JoinColumn()
+    profile: UserProfile;
 }
