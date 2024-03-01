@@ -40,7 +40,7 @@ export class User {
     // })
     roles: UserRole[];
 
-    @Column({ type: 'bool' })
+    @Column({ type: 'bool', default: false })
     isBanned: boolean;
 
     @OneToMany(type => Book, book => book.author)

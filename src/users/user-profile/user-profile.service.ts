@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './entities/user.entity';
-import { CreateUserDto } from 'src/auth/dto/create-user.dto';
+import { GetProfileResponse } from '../responses/get-profile.response';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import { GetProfileResponse } from './responses/get-profile.response';
 import { Role } from 'src/auth/enums/role.enum';
 
 @Injectable()
-export class UsersService {
+export class UserProfileService {
     constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
-
-    async findById(userId: number) {
-        return this.userRepository.findOne({ where: { id: userId } });
-    }
 
     async getProfile(userId: number): Promise<GetProfileResponse> {
         const user = await this.userRepository.findOne({

@@ -3,8 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '../entities/book.entity';
 import { Repository } from 'typeorm';
 import { UserBooks } from '../entities/user-books.entity';
-import { UsersService } from 'src/users/users.service';
-import { BooksLibService } from '../lib/books-lib.service';
+import { BooksLibService } from '../books-lib/books-lib.service';
 import { GetPublicBookInfoResponse } from './responses/get-public-book-info.response';
 import { GetPrivateBookInfoResponse } from './responses/get-private-book-info.response';
 
@@ -14,7 +13,6 @@ export class BookBasicsService {
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
         private bookLibService: BooksLibService,
-        // private userService: UsersService,
     ) {}
 
     async getBookPublicInfo(bookId: number): Promise<GetPublicBookInfoResponse> {

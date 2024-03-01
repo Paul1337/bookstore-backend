@@ -5,15 +5,15 @@ export class UserProfile {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: 'int4' })
+    @Column({ type: 'int4', nullable: true })
     age: number;
 
-    @Column({ type: 'int4' })
+    @Column({ type: 'int4', default: 0 })
     balance: number;
 
-    @Column({ type: 'varchar', length: 128 })
+    @Column({ type: 'varchar', length: 128, nullable: true })
     userImg: string;
 
-    @Column({ type: 'varchar', length: 128 })
+    @Column({ type: 'varchar', length: 128, nullable: true })
     backgroundImg: string;
 }
