@@ -32,4 +32,7 @@ export class UserBooks {
 
     @Column({ type: 'bool' })
     isPaid: boolean;
+
+    @Column()
+    isViewed: boolean;
 }
