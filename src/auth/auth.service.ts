@@ -71,16 +71,14 @@ export class AuthService {
 
         const passwordHash = bcrypt.hashSync(createUserDto.password, 5);
 
+        const basicUserRole = await this.UserRoleRepository.findOne({ where: { name: Role.User } });
         const newUser = this.userRepository.create({
             email: createUserDto.email,
             username: createUserDto.username,
             password: passwordHash,
             profile: {},
+            roles: [basicUserRole],
         });
-
-        const basicUserRole = await this.UserRoleRepository.findOne({ where: { name: Role.User } });
-        newUser.roles = [basicUserRole];
-
         await this.userRepository.save(newUser);
 
         return {

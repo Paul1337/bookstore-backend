@@ -9,16 +9,21 @@ import { BookWriteService } from './book-write/book-write.service';
 import { BookReadService } from './book-read/book-read.service';
 import { BooksLibService } from './books-lib/books-lib.service';
 import { BookCatalogService } from './book-catalog/book-catalog.service';
+import { BookPage } from './entities/book-page.entity';
+import { BookPart } from './entities/book-part.entity';
+import { BookReadController } from './book-read/book-read.controller';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Book, BookSeries, UserBooks])],
-    controllers: [BookBasicsController],
+    imports: [TypeOrmModule.forFeature([Book, BookSeries, UserBooks, BookPage, BookPart])],
+    controllers: [BookBasicsController, BookReadController],
     providers: [
         BookBasicsService,
         BookWriteService,
         BookReadService,
         BookCatalogService,
         BooksLibService,
+        BookPage,
+        BookPart,
     ],
 })
 export class BooksModule {}

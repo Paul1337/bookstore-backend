@@ -10,4 +10,8 @@ export class UsersLibService {
     async findById(userId: number) {
         return this.userRepository.findOne({ where: { id: userId } });
     }
+
+    async findWithProfileById(userId: number) {
+        return this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
+    }
 }

@@ -18,7 +18,7 @@ export class UserBooks {
     @JoinColumn()
     book: Book;
 
-    @Column({ type: 'int4' })
+    // @Column({ type: 'int4' })
     book_id: number;
 
     @Column({ type: 'bool' })
@@ -29,4 +29,7 @@ export class UserBooks {
 
     @Column({ type: 'int4' })
     currentPage: number;
+
+    @Column({ type: 'bool' })
+    isPaid: boolean;
 }

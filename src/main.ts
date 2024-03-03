@@ -11,6 +11,7 @@ async function bootstrap() {
     app.enableCors();
     app.useGlobalPipes(
         new ValidationPipe({
+            transform: true,
             exceptionFactory: (errors: ValidationError[]) => {
                 new BadRequestException(errors[0]);
             },

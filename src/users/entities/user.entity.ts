@@ -1,17 +1,16 @@
-import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    JoinColumn,
-    OneToMany,
-    ManyToMany,
-    JoinTable,
-    OneToOne,
-} from 'typeorm';
-import { UserRole } from './user-role.entity';
 import { Book } from 'src/books/entities/book.entity';
-import { UserBooks } from 'src/books/entities/user-books.entity';
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserProfile } from './user-profile.entity';
+import { UserRole } from './user-role.entity';
 
 @Entity()
 export class User {
@@ -34,10 +33,10 @@ export class User {
     password: string;
 
     @JoinTable({ name: 'user_roles' })
-    @ManyToMany(() => UserRole)
-    // {
-    //     eager: true,
-    // })
+    @ManyToMany(() => UserRole, {
+        eager: true,
+        cascade: ['insert', 'update'],
+    })
     roles: UserRole[];
 
     @Column({ type: 'bool', default: false })
