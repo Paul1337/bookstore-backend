@@ -5,18 +5,15 @@ DECLARE
     user_id INT;
     series_id INT;
     book_id INT;
-    book_parts INT[];
-    book_pages INT[];
-
 BEGIN
 
-    DELETE FROM user_profile;
-    DELETE FROM "user";
-    DELETE FROM user_roles;
-    DELETE FROM book_series;
-    DELETE FROM book;
     DELETE FROM book_part;
     DELETE FROM book_page;
+    DELETE FROM book;
+    DELETE FROM book_series;
+    DELETE FROM "user";
+    DELETE FROM user_profile;
+    DELETE FROM user_roles;
 
     -- create user profile
     INSERT INTO user_profile (age, balance) VALUES (25, 1200) RETURNING id INTO user_profile_id;
@@ -37,14 +34,14 @@ BEGIN
         VALUES ('test book title', 'book description', 0, 0, 0, 'finished', False, False, '12+', user_id, series_id) RETURNING id into book_id;
 
     -- create some book parts
-    INSERT INTO book_part (index, title, book_id) VALUES (1, 'Part 1: the start', book_id) RETURNING id INTO book_parts[0];
-    INSERT INTO book_part (index, title, book_id) VALUES (2, 'Part 2: the book continues', book_id) RETURNING id INTO book_parts[1];
+    INSERT INTO book_part (id, index, title, book_id) VALUES (0, 1, 'Part 1: the start', book_id);
+    INSERT INTO book_part (id, index, title, book_id) VALUES (1, 2, 'Part 2: the book continues', book_id);
 
     -- create some test pages
-    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 1', 1, book_parts[0], book_id);
-    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 2', 2, book_parts[0], book_id);
-    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 3', 3, book_parts[1], book_id);
-    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 4', 4, book_parts[1], book_id);
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 1', 1, 0, book_id);
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 2', 2, 0, book_id);
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 3', 3, 1, book_id);
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 4', 4, 1, book_id);
 
 END$$;
 
