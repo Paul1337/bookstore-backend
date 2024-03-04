@@ -35,18 +35,18 @@ export class User {
     @JoinTable({ name: 'user_roles' })
     @ManyToMany(() => UserRole, {
         eager: true,
-        cascade: ['insert', 'update'],
+        cascade: ['insert', 'update', 'remove'],
     })
     roles: UserRole[];
 
     @Column({ type: 'bool', default: false })
     isBanned: boolean;
 
-    @OneToMany(type => Book, book => book.author)
+    @OneToMany((type) => Book, (book) => book.author)
     writtenBooks?: Book[];
 
-    @OneToOne(type => UserProfile, {
-        cascade: ['update', 'insert'],
+    @OneToOne((type) => UserProfile, {
+        cascade: ['update', 'insert', 'remove'],
     })
     @JoinColumn()
     profile: UserProfile;

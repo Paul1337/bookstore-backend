@@ -4,8 +4,19 @@ DECLARE
     user_profile_id INT;
     user_id INT;
     series_id INT;
+    book_id INT;
+    book_parts INT[];
+    book_pages INT[];
 
 BEGIN
+
+    DELETE FROM user_profile;
+    DELETE FROM "user";
+    DELETE FROM user_roles;
+    DELETE FROM book_series;
+    DELETE FROM book;
+    DELETE FROM book_part;
+    DELETE FROM book_page;
 
     -- create user profile
     INSERT INTO user_profile (age, balance) VALUES (25, 1200) RETURNING id INTO user_profile_id;
@@ -23,8 +34,17 @@ BEGIN
 
     -- create book
     INSERT INTO book (title, description, views_count, rewards_count, adds_to_library_count, status, is_published, is_banned, age_restriction, author_id, series_id)
-        VALUES ('test book title', 'book description', 0, 0, 0, 'finished', False, False, '12+', user_id, series_id);
+        VALUES ('test book title', 'book description', 0, 0, 0, 'finished', False, False, '12+', user_id, series_id) RETURNING id into book_id;
 
+    -- create some book parts
+    INSERT INTO book_part (index, title, book_id) VALUES (1, 'Part 1: the start', book_id) RETURNING id INTO book_parts[0];
+    INSERT INTO book_part (index, title, book_id) VALUES (2, 'Part 2: the book continues', book_id) RETURNING id INTO book_parts[1];
+
+    -- create some test pages
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 1', 1, book_parts[0], book_id);
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 2', 2, book_parts[0], book_id);
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 3', 3, book_parts[1], book_id);
+    INSERT INTO book_page (content, index, book_part_id, book_id) VALUES ('this is the content of page 4', 4, book_parts[1], book_id);
 
 END$$;
 
