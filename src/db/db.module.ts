@@ -1,21 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from 'src/auth/auth.module';
-import { UsersModule } from 'src/users/users.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { BooksModule } from 'src/books/books.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import path from 'path';
 
 @Module({
     imports: [
-        ServeStaticModule.forRoot({
-            rootPath: path.join(__dirname, '../..', 'static'),
-            renderPath: '/',
-        }),
         TypeOrmModule.forRootAsync({
             useFactory: (config: ConfigService) => ({
                 type: 'postgres',
@@ -31,13 +20,8 @@ import path from 'path';
             imports: [ConfigModule],
             inject: [ConfigService],
         }),
-        ConfigModule.forRoot({
-            isGlobal: true,
-        }),
-        AuthModule,
-        UsersModule,
-        BooksModule,
     ],
-    controllers: [],
+    providers: [],
+    exports: [],
 })
-export class AppModule {}
+export class DBModule {}
