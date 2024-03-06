@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from 'src/auth/auth.module';
-import { UsersModule } from 'src/users/users.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { BooksModule } from 'src/books/books.module';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import path from 'path';
+import { AuthModule } from 'src/auth/auth.module';
+import { BooksModule } from 'src/books/books.module';
+import { UsersModule } from 'src/users/users.module';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({
     imports: [
@@ -19,11 +17,11 @@ import path from 'path';
         TypeOrmModule.forRootAsync({
             useFactory: (config: ConfigService) => ({
                 type: 'postgres',
+                database: 'bookstore',
                 host: config.get('DB_HOST'),
                 port: config.get('DB_PORT'),
                 username: config.get('DB_USER'),
                 password: config.get('DB_PASSWORD'),
-                database: 'bookstore',
                 autoLoadEntities: true,
                 synchronize: true,
                 namingStrategy: new SnakeNamingStrategy(),
