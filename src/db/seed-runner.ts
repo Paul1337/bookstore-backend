@@ -1,6 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions, runSeeders } from 'typeorm-extension';
-import GlobalSeeder from './seeds/global.seeder';
+import GlobalSeeder from './seeders/global.seeder';
 import { BookPage } from 'src/books/entities/book-page.entity';
 import 'dotenv/config';
 import { BookPart } from 'src/books/entities/book-part.entity';
