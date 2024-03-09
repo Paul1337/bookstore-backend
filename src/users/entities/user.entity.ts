@@ -42,10 +42,10 @@ export class User {
     @Column({ type: 'bool', default: false })
     isBanned: boolean;
 
-    @OneToMany((type) => Book, (book) => book.author)
+    @OneToMany(type => Book, book => book.author)
     writtenBooks?: Book[];
 
-    @OneToOne((type) => UserProfile, {
+    @OneToOne(type => UserProfile, {
         cascade: ['update', 'insert', 'remove'],
     })
     @JoinColumn()

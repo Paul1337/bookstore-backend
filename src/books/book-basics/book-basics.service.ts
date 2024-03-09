@@ -6,6 +6,7 @@ import { UserBooks } from '../entities/user-books.entity';
 import { BooksLibService } from '../books-lib/books-lib.service';
 import { GetPublicBookInfoResponse } from './responses/get-public-book-info.response';
 import { GetPrivateBookInfoResponse } from './responses/get-private-book-info.response';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class BookBasicsService {
@@ -20,6 +21,15 @@ export class BookBasicsService {
             where: { id: bookId },
             relations: ['author', 'series'],
         });
+
+        const bookInfo = await this.bookRepository
+            .createQueryBuilder('book')
+            .leftJoin(UserBooks, 'bookInfo', 'book.id = bookInfo.book_id')
+            .leftJoin(User, 'user', 'user.id = bookInfo.user_id')
+            .select('COUNT(*)', 'starsCount')
+            .where('book.id = :bookId', { bookId })
+            .where('bookInfo.isStarred = true')
+            .getRawOne();
 
         return {
             id: bookWithRelations.id,
@@ -45,6 +55,7 @@ export class BookBasicsService {
             isBanned: bookWithRelations.isBanned,
             ageRestriction: bookWithRelations.ageRestriction,
             series: bookWithRelations.series,
+            starsCount: Number(bookInfo.starsCount),
         };
     }
 

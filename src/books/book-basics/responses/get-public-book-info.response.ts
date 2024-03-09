@@ -22,4 +22,5 @@ export class GetPublicBookInfoResponse {
     isBanned: boolean;
     ageRestriction: string;
     series?: BookSeries;
+    starsCount: number;
 }

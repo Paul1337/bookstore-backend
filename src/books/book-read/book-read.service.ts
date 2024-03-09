@@ -21,17 +21,16 @@ export class BookReadService {
     // can possibly add validation to make sure pageFrom is less or equal to pageTo
     async getPagesPublic(getPagesDto: GetPagesDto, bookId: number): Promise<GetPagesResponse> {
         // can only access free pages
+        const { pageFrom, pageTo } = getPagesDto;
 
         const pages = await this.bookPageRepository
             .createQueryBuilder('bookPage')
             .leftJoin(Book, 'book', 'book.id = bookPage.book_id')
             .leftJoin(BookPart, 'bookPart', 'bookPart.id = bookPage.book_part_id')
-            .where('bookPage.book_id = :bookId AND bookPage.index BETWEEN :pageFrom AND :pageTo', {
-                pageFrom: getPagesDto.pageFrom,
-                pageTo: getPagesDto.pageTo,
-                bookId,
-            })
+            .where('bookPage.book_id = :bookId', { bookId })
             .andWhere('bookPart.index <= book.freeChaptersCount')
+            .skip(pageFrom - 1)
+            .take(pageTo - pageFrom + 1)
             .orderBy('bookPage.index asc')
             .getMany();
 
@@ -46,6 +45,8 @@ export class BookReadService {
     ): Promise<GetPagesResponse> {
         // can access free pages and others if book is paid
 
+        const { pageFrom, pageTo } = getPagesDto;
+
         const pages = await this.bookPageRepository
             .createQueryBuilder('bookPage')
             .leftJoin(Book, 'book', 'book.id = bookPage.book_id')
@@ -56,12 +57,10 @@ export class BookReadService {
                 'bookInfo.user_id = :userId AND bookInfo.book_id = bookPage.book_id',
                 { userId },
             )
-            .where('bookPage.book_id = :bookId AND bookPage.index BETWEEN :pageFrom AND :pageTo', {
-                pageFrom: getPagesDto.pageFrom,
-                pageTo: getPagesDto.pageTo,
-                bookId,
-            })
+            .where('bookPage.book_id = :bookId', { bookId })
             .andWhere('bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount')
+            .skip(pageFrom - 1)
+            .take(pageTo - pageFrom + 1)
             .orderBy('bookPage.index asc')
             .getMany();
 

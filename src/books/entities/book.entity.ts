@@ -16,14 +16,11 @@ export class Book {
     @PrimaryGeneratedColumn({ type: 'int4' })
     id: number;
 
-    @Column({ type: 'varchar', length: 64 })
+    @Column({ type: 'varchar', length: 128 })
     title: string;
 
-    @Column({ type: 'varchar', length: 64 })
+    @Column({ type: 'varchar', length: 1024 })
     description: string;
-
-    // @Column({ type: 'int4' })
-    // starsCount: number;
 
     @Column({ type: 'int4' })
     viewsCount: number;
@@ -45,10 +42,10 @@ export class Book {
     @Column({ type: 'int4' })
     addsToLibraryCount: number;
 
-    @Column({ type: 'varchar', length: 64, nullable: true })
+    @Column({ type: 'varchar', length: 2048, nullable: true })
     backgroundSrc: string;
 
-    @Column({ type: 'varchar', length: 64, nullable: true })
+    @Column({ type: 'varchar', length: 2048, nullable: true })
     coverSrc: string;
 
     @Column({ type: 'int4', nullable: true })

@@ -16,21 +16,6 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
             renderPath: '/',
         }),
         DBModule,
-        // TypeOrmModule.forRootAsync({
-        //     useFactory: (config: ConfigService) => ({
-        //         type: 'postgres',
-        //         database: 'bookstore',
-        //         host: config.get('DB_HOST'),
-        //         port: config.get('DB_PORT'),
-        //         username: config.get('DB_USER'),
-        //         password: config.get('DB_PASSWORD'),
-        //         autoLoadEntities: true,
-        //         synchronize: true,
-        //         namingStrategy: new SnakeNamingStrategy(),
-        //     }),
-        //     imports: [ConfigModule],
-        //     inject: [ConfigService],
-        // }),
         ConfigModule.forRoot({
             isGlobal: true,
         }),

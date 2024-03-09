@@ -18,7 +18,7 @@ export class UserBooks {
     @JoinColumn()
     book: Book;
 
-    // @Column({ type: 'int4' })
+    @Column({ type: 'int4' })
     book_id: number;
 
     @Column({ type: 'bool' })

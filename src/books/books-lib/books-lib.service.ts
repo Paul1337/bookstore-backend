@@ -25,6 +25,8 @@ export class BooksLibService {
                 user_id: userId,
                 isStarred: false,
                 isInLibrary: false,
+                isPaid: false,
+                isViewed: false,
                 currentPage: -1,
             });
             // await this.userBooksRepository.save(bookInfo);

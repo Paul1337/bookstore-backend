@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -31,7 +31,7 @@ export class AuthController {
         return this.authService.register(createUserDto);
     }
 
-    @Post('/me')
+    @Get('/me')
     @Roles(...AllRoles)
     @ApiOperation({
         summary: 'Получение первичных данных пользователя, если неавторизован - вернёт ошибку',
