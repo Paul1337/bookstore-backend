@@ -1,6 +1,7 @@
 import { Book } from 'src/books/entities/book.entity';
 import {
     Column,
+    CreateDateColumn,
     Entity,
     JoinColumn,
     JoinTable,
@@ -16,6 +17,9 @@ import { UserRole } from './user-role.entity';
 export class User {
     @PrimaryGeneratedColumn({ type: 'int4' })
     id: number;
+
+    @CreateDateColumn()
+    createdAt: Date;
 
     @Column({ type: 'varchar', length: 64, default: '' })
     firstName: string;

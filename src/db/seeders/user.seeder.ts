@@ -9,6 +9,7 @@ export default class UserSeeder implements Seeder {
 
     public async run(dataSource: DataSource, factoryManager: SeederFactoryManager): Promise<void> {
         console.log('Running user seeder :)');
+        console.log('Users count:', this.UsersCount);
 
         const userFactory = factoryManager.get(User);
         const profileFactory = factoryManager.get(UserProfile);

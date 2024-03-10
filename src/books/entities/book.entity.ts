@@ -22,8 +22,8 @@ export class Book {
     @Column({ type: 'varchar', length: 1024 })
     description: string;
 
-    @Column({ type: 'int4' })
-    viewsCount: number;
+    // @Column({ type: 'int4' })
+    // viewsCount: number;
 
     @Column({ type: 'int4' })
     rewardsCount: number;
@@ -33,8 +33,14 @@ export class Book {
     })
     author?: User;
 
+    @Column({ type: 'int4' })
+    authorId: number;
+
     @Column({ type: 'timestamp', nullable: true })
     createdAt: Date;
+
+    // @Column({ type: 'timestamp', nullable: true })
+    // finishedAt: Date;
 
     @Column({ type: 'timestamp', nullable: true })
     updatedAt: Date;
@@ -66,6 +72,11 @@ export class Book {
     @Column({ type: 'varchar', length: 32 })
     ageRestriction: string;
 
-    @ManyToOne(() => BookSeries, series => series.id)
+    @ManyToOne(() => BookSeries, series => series.id, {
+        nullable: true,
+    })
     series?: BookSeries;
+
+    @Column({ type: 'int4', nullable: true })
+    seriesId: number;
 }

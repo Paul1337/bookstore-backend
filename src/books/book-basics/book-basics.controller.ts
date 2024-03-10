@@ -5,11 +5,21 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { RequestExtended } from 'src/auth/lib/request-extension';
 import { BookBasicsService } from './book-basics.service';
+import { GetMyLibraryResponse } from './responses/get-my-library.response';
 
 @Controller('books')
 @ApiTags('books-basics')
 export class BookBasicsController {
     constructor(private readonly bookBasicsService: BookBasicsService) {}
+
+    @Get('myLibrary')
+    @Roles(Role.User)
+    @ApiOperation({
+        summary: 'Получение списка книг в библиотеке пользователя',
+    })
+    async getMyLibrary(@Req() request: RequestExtended) {
+        return this.bookBasicsService.getMyLibrary(request.user.id);
+    }
 
     @Get(':bookId')
     @Public()

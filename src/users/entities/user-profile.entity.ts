@@ -11,9 +11,9 @@ export class UserProfile {
     @Column({ type: 'int4', default: 0 })
     balance: number;
 
-    @Column({ type: 'varchar', length: 128, nullable: true })
+    @Column({ type: 'varchar', length: 1024, nullable: true })
     userImg: string;
 
-    @Column({ type: 'varchar', length: 128, nullable: true })
+    @Column({ type: 'varchar', length: 1024, nullable: true })
     backgroundImg: string;
 }

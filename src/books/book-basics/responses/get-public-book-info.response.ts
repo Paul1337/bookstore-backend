@@ -7,7 +7,6 @@ export class GetPublicBookInfoResponse {
     id: number;
     title: string;
     description: string;
-    viewsCount: number;
     rewardsCount: number;
     author?: DeepPartial<User>;
     createdAt: Date;
@@ -22,5 +21,7 @@ export class GetPublicBookInfoResponse {
     isBanned: boolean;
     ageRestriction: string;
     series?: BookSeries;
+    viewsCount: number;
     starsCount: number;
+    paidCount: number;
 }

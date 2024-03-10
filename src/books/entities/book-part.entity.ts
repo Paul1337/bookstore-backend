@@ -15,4 +15,7 @@ export class BookPart {
     @ManyToOne(type => Book)
     @JoinColumn({ name: 'book_id' })
     book: Book;
+
+    @Column({ type: 'int4' })
+    bookId: number;
 }
