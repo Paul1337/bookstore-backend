@@ -23,6 +23,8 @@ export class BookReadService {
         // can only access free pages
         const { pageFrom, pageTo } = getPagesDto;
 
+        console.log('get pages public');
+
         const pages = await this.bookPageRepository
             .createQueryBuilder('bookPage')
             .leftJoin(Book, 'book', 'book.id = bookPage.book_id')

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Injectable, Param, ParseIntPipe, Req } from '@nestjs/common';
+import { Body, Controller, Get, Injectable, Param, ParseIntPipe, Query, Req } from '@nestjs/common';
 import { BookReadService } from './book-read.service';
 import { ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -23,10 +23,11 @@ export class BookReadController {
     // isArray: true,
     // })
     async getPages(
-        @Body() getPagesDto: GetPagesDto,
+        @Query() getPagesDto: GetPagesDto,
         @Param('bookId') bookId: number,
         @Req() req: RequestExtended,
     ) {
+        console.log(getPagesDto);
         const userId = req.user?.id;
         if (userId) {
             return this.bookReadService.getPagesPrivate(getPagesDto, bookId, userId);

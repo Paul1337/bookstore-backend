@@ -30,39 +30,41 @@ export default class BookSeeder implements Seeder {
         const bookPartFactory = factoryManager.get(BookPart);
         const bookPageFactory = factoryManager.get(BookPage);
 
-        for (let i = 0; i < this.BooksCount; i++) {
-            const author = await dataSource
-                .getRepository(User)
-                .createQueryBuilder('user')
-                .orderBy('RANDOM()')
-                .limit(1)
-                .getOne();
+        await dataSource.transaction(async entityManager => {
+            for (let i = 0; i < this.BooksCount; i++) {
+                const author = await dataSource
+                    .getRepository(User)
+                    .createQueryBuilder('user')
+                    .orderBy('RANDOM()')
+                    .limit(1)
+                    .getOne();
 
-            let book = await bookFactory.make();
-            book.authorId = author.id;
+                let book = await bookFactory.make();
+                book.authorId = author.id;
 
-            book = await bookFactory.save(book);
+                book = await bookFactory.save(book);
 
-            // book.author = author ?? - will it work
+                // book.author = author ?? - will it work
 
-            const partsCount = this.PickPartsCount();
-            for (let j = 0; j < partsCount; j++) {
-                const pagesCount = this.PickPagesCount();
+                const partsCount = this.PickPartsCount();
+                for (let j = 0; j < partsCount; j++) {
+                    const pagesCount = this.PickPagesCount();
 
-                let bookPart = await bookPartFactory.make();
+                    let bookPart = await bookPartFactory.make();
 
-                bookPart.bookId = book.id;
-                bookPart.index = j + 1;
-                bookPart = await bookPartFactory.save(bookPart);
+                    bookPart.bookId = book.id;
+                    bookPart.index = j + 1;
+                    bookPart = await bookPartFactory.save(bookPart);
 
-                for (let k = 0; k < pagesCount; k++) {
-                    const page = await bookPageFactory.make();
-                    page.bookPartId = bookPart.id;
-                    page.bookId = book.id;
-                    page.index = k + 1;
-                    await bookPageFactory.save(page);
+                    for (let k = 0; k < pagesCount; k++) {
+                        const page = await bookPageFactory.make();
+                        page.bookPartId = bookPart.id;
+                        page.bookId = book.id;
+                        page.index = k + 1;
+                        await bookPageFactory.save(page);
+                    }
                 }
             }
-        }
+        });
     }
 }

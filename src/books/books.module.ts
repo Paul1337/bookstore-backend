@@ -15,7 +15,7 @@ import { BookReadController } from './book-read/book-read.controller';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Book, BookSeries, UserBooks, BookPage, BookPart])],
-    controllers: [BookBasicsController, BookReadController],
+    controllers: [BookReadController, BookBasicsController],
     providers: [
         BookBasicsService,
         BookWriteService,
