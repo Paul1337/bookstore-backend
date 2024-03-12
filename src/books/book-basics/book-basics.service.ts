@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '../entities/book.entity';
 import { Repository } from 'typeorm';
 import { UserBooks } from '../entities/user-books.entity';
-import { UsersService } from 'src/users/users.service';
-import { BooksLibService } from '../lib/books-lib.service';
+import { BooksLibService } from '../books-lib/books-lib.service';
 import { GetPublicBookInfoResponse } from './responses/get-public-book-info.response';
 import { GetPrivateBookInfoResponse } from './responses/get-private-book-info.response';
+import { User } from 'src/users/entities/user.entity';
+import { GetMyLibraryResponse } from './responses/get-my-library.response';
 
 @Injectable()
 export class BookBasicsService {
@@ -14,7 +15,6 @@ export class BookBasicsService {
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
         private bookLibService: BooksLibService,
-        // private userService: UsersService,
     ) {}
 
     async getBookPublicInfo(bookId: number): Promise<GetPublicBookInfoResponse> {
@@ -23,11 +23,20 @@ export class BookBasicsService {
             relations: ['author', 'series'],
         });
 
+        const bookInfo = await this.bookRepository
+            .createQueryBuilder('book')
+            .leftJoin(UserBooks, 'bookInfo', 'book.id = bookInfo.book_id')
+            .leftJoin(User, 'user', 'user.id = bookInfo.user_id')
+            .select('SUM(CAST(bookInfo.isStarred as INT))', 'starsCount')
+            .addSelect('SUM(CAST(bookInfo.isViewed as INT))', 'viewsCount')
+            .addSelect('SUM(CAST(bookInfo.isPaid as INT))', 'paidCount')
+            .where('book.id = :bookId', { bookId })
+            .getRawOne();
+
         return {
             id: bookWithRelations.id,
             title: bookWithRelations.title,
             description: bookWithRelations.description,
-            viewsCount: bookWithRelations.viewsCount,
             rewardsCount: bookWithRelations.rewardsCount,
             author: {
                 username: bookWithRelations.author.username,
@@ -47,6 +56,9 @@ export class BookBasicsService {
             isBanned: bookWithRelations.isBanned,
             ageRestriction: bookWithRelations.ageRestriction,
             series: bookWithRelations.series,
+            starsCount: Number(bookInfo.starsCount),
+            viewsCount: Number(bookInfo.viewsCount),
+            paidCount: Number(bookInfo.paidCount),
         };
     }
 
@@ -54,12 +66,30 @@ export class BookBasicsService {
         const publicBookInfo = await this.getBookPublicInfo(bookId);
         const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
 
+        if (!bookInfo.isViewed) {
+            bookInfo.isViewed = true;
+            await this.userBooksRepository.update({ id: bookInfo.id }, { isViewed: true });
+        }
+
         return {
             ...publicBookInfo,
             isStarred: bookInfo.isStarred,
             isInLibrary: bookInfo.isInLibrary,
             currentPage: bookInfo.currentPage,
         };
+    }
+
+    async getMyLibrary(userId: number): Promise<GetMyLibraryResponse> {
+        const books = await this.bookRepository
+            .createQueryBuilder('book')
+            .select(['book.title', 'book.description', 'book.coverSrc'])
+            .leftJoin(UserBooks, 'bookInfo', 'bookInfo.book_id = book.id')
+            .leftJoin(User, 'user', 'user.id = bookInfo.user_id')
+            .where('user.id = :userId', { userId })
+            .andWhere('bookInfo.isInLibrary = true')
+            .getMany();
+
+        return books;
     }
 
     async starBook(bookId: number, userId: number) {
@@ -77,7 +107,20 @@ export class BookBasicsService {
 
     async addBookToLibrary(bookId: number, userId: number) {
         const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+
+        if (!bookInfo.wasInLibrary) {
+            await this.bookRepository
+                .createQueryBuilder()
+                .update(Book)
+                .set({
+                    addsToLibraryCount: () => 'addsToLibraryCount + 1',
+                })
+                .where('id = :bookId', { bookId })
+                .execute();
+        }
+
         bookInfo.isInLibrary = true;
+        bookInfo.wasInLibrary = true;
         await this.userBooksRepository.save(bookInfo);
     }
 

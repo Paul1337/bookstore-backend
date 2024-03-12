@@ -11,6 +11,10 @@ async function bootstrap() {
     app.enableCors();
     app.useGlobalPipes(
         new ValidationPipe({
+            transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
             exceptionFactory: (errors: ValidationError[]) => {
                 new BadRequestException(errors[0]);
             },
@@ -21,7 +25,6 @@ async function bootstrap() {
         .setTitle('Bookstore backend API')
         .setDescription('Bookstore API description')
         .setVersion('1.0')
-        // .addTag('cats')
         .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);

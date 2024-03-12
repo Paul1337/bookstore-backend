@@ -16,26 +16,31 @@ export class Book {
     @PrimaryGeneratedColumn({ type: 'int4' })
     id: number;
 
-    @Column({ type: 'varchar', length: 64 })
+    @Column({ type: 'varchar', length: 128 })
     title: string;
 
-    @Column({ type: 'varchar', length: 64 })
+    @Column({ type: 'varchar', length: 1024 })
     description: string;
 
     // @Column({ type: 'int4' })
-    // starsCount: number;
-
-    @Column({ type: 'int4' })
-    viewsCount: number;
+    // viewsCount: number;
 
     @Column({ type: 'int4' })
     rewardsCount: number;
 
-    @ManyToOne(() => User, (user) => user.writtenBooks)
+    @ManyToOne(() => User, user => user.writtenBooks, {
+        nullable: false,
+    })
     author?: User;
+
+    @Column({ type: 'int4' })
+    authorId: number;
 
     @Column({ type: 'timestamp', nullable: true })
     createdAt: Date;
+
+    // @Column({ type: 'timestamp', nullable: true })
+    // finishedAt: Date;
 
     @Column({ type: 'timestamp', nullable: true })
     updatedAt: Date;
@@ -43,10 +48,10 @@ export class Book {
     @Column({ type: 'int4' })
     addsToLibraryCount: number;
 
-    @Column({ type: 'varchar', length: 64, nullable: true })
+    @Column({ type: 'varchar', length: 2048, nullable: true })
     backgroundSrc: string;
 
-    @Column({ type: 'varchar', length: 64, nullable: true })
+    @Column({ type: 'varchar', length: 2048, nullable: true })
     coverSrc: string;
 
     @Column({ type: 'int4', nullable: true })
@@ -67,15 +72,11 @@ export class Book {
     @Column({ type: 'varchar', length: 32 })
     ageRestriction: string;
 
-    @ManyToOne(() => BookSeries, (series) => series.id)
+    @ManyToOne(() => BookSeries, series => series.id, {
+        nullable: true,
+    })
     series?: BookSeries;
 
-    // @ManyToMany(() => User, (user) => user.starredBooks)
-    // starredUsers: User[];
-
-    // @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
-    // createdAt: Date;
-
-    // @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
-    // updatedAt: Date;
+    @Column({ type: 'int4', nullable: true })
+    seriesId: number;
 }

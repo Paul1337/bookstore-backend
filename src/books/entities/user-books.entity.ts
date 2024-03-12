@@ -27,6 +27,15 @@ export class UserBooks {
     @Column({ type: 'bool' })
     isInLibrary: boolean;
 
+    @Column({ type: 'bool', default: false })
+    wasInLibrary: boolean;
+
     @Column({ type: 'int4' })
     currentPage: number;
+
+    @Column({ type: 'bool' })
+    isPaid: boolean;
+
+    @Column()
+    isViewed: boolean;
 }
