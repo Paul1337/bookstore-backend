@@ -12,6 +12,9 @@ async function bootstrap() {
     app.useGlobalPipes(
         new ValidationPipe({
             transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
             exceptionFactory: (errors: ValidationError[]) => {
                 new BadRequestException(errors[0]);
             },

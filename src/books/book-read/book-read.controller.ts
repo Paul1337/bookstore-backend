@@ -13,11 +13,11 @@ export class BookReadController {
 
     @Get(':bookId/pages')
     @Public()
-    @ApiOperation({
-        summary: 'Получение диапазона страниц определённой книги',
-        description:
-            'Если какие-то страницы из диапазона не доступны пользователю, они не будут возвращены.',
-    })
+    // @ApiOperation({
+    //     summary: 'Получение диапазона страниц определённой книги',
+    //     description:
+    //         'Если какие-то страницы из диапазона не доступны пользователю, они не будут возвращены.',
+    // })
     // @ApiOkResponse({
     // schema: GetPageResponse,
     // isArray: true,
@@ -27,7 +27,6 @@ export class BookReadController {
         @Param('bookId') bookId: number,
         @Req() req: RequestExtended,
     ) {
-        console.log(getPagesDto);
         const userId = req.user?.id;
         if (userId) {
             return this.bookReadService.getPagesPrivate(getPagesDto, bookId, userId);

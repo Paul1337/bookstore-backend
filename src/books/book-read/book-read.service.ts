@@ -23,20 +23,26 @@ export class BookReadService {
         // can only access free pages
         const { pageFrom, pageTo } = getPagesDto;
 
-        console.log('get pages public');
-
         const pages = await this.bookPageRepository
             .createQueryBuilder('bookPage')
             .leftJoin(Book, 'book', 'book.id = bookPage.book_id')
-            .leftJoin(BookPart, 'bookPart', 'bookPart.id = bookPage.book_part_id')
+            .leftJoinAndSelect(BookPart, 'bookPart', 'bookPart.id = bookPage.book_part_id')
             .where('bookPage.book_id = :bookId', { bookId })
             .andWhere('bookPart.index <= book.freeChaptersCount')
             .skip(pageFrom - 1)
             .take(pageTo - pageFrom + 1)
-            .orderBy('bookPage.index asc')
+            .addOrderBy('bookPart.index', 'ASC')
+            .addOrderBy('bookPage.index', 'ASC')
             .getMany();
 
-        console.log('get pages public', pages);
+        // console.log(
+        //     'get pages public',
+        //     pages.map(page => ({
+        //         ind: page.index,
+        //         bookId: page.bookId,
+        //         partId: page.bookPartId,
+        //     })),
+        // );
         return pages.map(this.mapPageToResponse);
     }
 
@@ -52,7 +58,7 @@ export class BookReadService {
         const pages = await this.bookPageRepository
             .createQueryBuilder('bookPage')
             .leftJoin(Book, 'book', 'book.id = bookPage.book_id')
-            .leftJoin(BookPart, 'bookPart', 'bookPart.id = bookPage.book_part_id')
+            .leftJoinAndSelect(BookPart, 'bookPart', 'bookPart.id = bookPage.book_part_id')
             .leftJoin(
                 UserBooks,
                 'bookInfo',
@@ -63,7 +69,8 @@ export class BookReadService {
             .andWhere('bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount')
             .skip(pageFrom - 1)
             .take(pageTo - pageFrom + 1)
-            .orderBy('bookPage.index asc')
+            .addOrderBy('bookPart.index', 'ASC')
+            .addOrderBy('bookPage.index', 'ASC')
             .getMany();
 
         console.log('get pages private', pages);

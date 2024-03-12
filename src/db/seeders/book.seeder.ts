@@ -47,6 +47,7 @@ export default class BookSeeder implements Seeder {
                 // book.author = author ?? - will it work
 
                 const partsCount = this.PickPartsCount();
+                let lastPageInd = 0;
                 for (let j = 0; j < partsCount; j++) {
                     const pagesCount = this.PickPagesCount();
 
@@ -60,7 +61,7 @@ export default class BookSeeder implements Seeder {
                         const page = await bookPageFactory.make();
                         page.bookPartId = bookPart.id;
                         page.bookId = book.id;
-                        page.index = k + 1;
+                        page.index = ++lastPageInd;
                         await bookPageFactory.save(page);
                     }
                 }
