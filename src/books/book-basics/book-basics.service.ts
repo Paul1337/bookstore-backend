@@ -94,15 +94,11 @@ export class BookBasicsService {
     }
 
     async starBook(bookId: number, userId: number) {
-        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
-        bookInfo.isStarred = true;
-        await this.userBooksRepository.save(bookInfo);
+        await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, { isStarred: true });
     }
 
     async unstarBook(bookId: number, userId: number) {
-        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
-        bookInfo.isStarred = false;
-        await this.userBooksRepository.save(bookInfo);
+        await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, { isStarred: false });
     }
 
     async addBookToLibrary(bookId: number, userId: number) {
@@ -125,8 +121,6 @@ export class BookBasicsService {
     }
 
     async removeBookFromLibrary(bookId: number, userId: number) {
-        const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
-        bookInfo.isInLibrary = false;
-        await this.userBooksRepository.save(bookInfo);
+        await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, { isInLibrary: false });
     }
 }

@@ -27,7 +27,7 @@ export class BookReadController {
         return this.bookReadService.getPages(getPagesDto, bookId, req.user?.id);
     }
 
-    @Get(':bookId/part/:partId')
+    @Get(':bookId/part/:partIndex')
     @Public()
     @ApiOperation({
         summary:
@@ -37,9 +37,9 @@ export class BookReadController {
     async getBookPart(
         @Query() getPartDto: GetPartDto,
         @Param('bookId') bookId: number,
-        @Param('partId') partId: number,
+        @Param('partIndex') partIndex: number,
         @Req() req: RequestExtended,
     ) {
-        return this.bookReadService.getPart(getPartDto, bookId, partId, req.user?.id);
+        return this.bookReadService.getPart(getPartDto, bookId, partIndex, req.user?.id);
     }
 }
