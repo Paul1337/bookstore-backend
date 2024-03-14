@@ -12,14 +12,14 @@ export class UserBooks {
     user: User;
 
     @Column({ type: 'int4' })
-    user_id: number;
+    userId: number;
 
     @ManyToOne(type => Book)
     @JoinColumn()
     book: Book;
 
     @Column({ type: 'int4' })
-    book_id: number;
+    bookId: number;
 
     @Column({ type: 'bool' })
     isStarred: boolean;
@@ -30,8 +30,11 @@ export class UserBooks {
     @Column({ type: 'bool', default: false })
     wasInLibrary: boolean;
 
-    @Column({ type: 'int4' })
+    @Column({ type: 'int4', default: 1 })
     currentPage: number;
+
+    @Column({ type: 'int4', default: 1 })
+    currentPart: number;
 
     @Column({ type: 'bool' })
     isPaid: boolean;

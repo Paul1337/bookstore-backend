@@ -24,4 +24,5 @@ export class GetPublicBookInfoResponse {
     viewsCount: number;
     starsCount: number;
     paidCount: number;
+    parts: string[];
 }

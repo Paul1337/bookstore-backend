@@ -1,7 +1,8 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Book } from './book.entity';
 
 @Entity()
+@Unique(['index', 'bookId'])
 export class BookPart {
     @PrimaryGeneratedColumn({ type: 'int4' })
     id: number;

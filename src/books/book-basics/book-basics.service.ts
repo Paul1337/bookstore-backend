@@ -20,7 +20,7 @@ export class BookBasicsService {
     async getBookPublicInfo(bookId: number): Promise<GetPublicBookInfoResponse> {
         const bookWithRelations = await this.bookRepository.findOne({
             where: { id: bookId },
-            relations: ['author', 'series'],
+            relations: ['author', 'series', 'parts'],
         });
 
         const bookInfo = await this.bookRepository
@@ -59,6 +59,7 @@ export class BookBasicsService {
             starsCount: Number(bookInfo.starsCount),
             viewsCount: Number(bookInfo.viewsCount),
             paidCount: Number(bookInfo.paidCount),
+            parts: bookWithRelations.parts.map(part => part.title),
         };
     }
 
@@ -94,7 +95,6 @@ export class BookBasicsService {
 
     async starBook(bookId: number, userId: number) {
         const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
-
         bookInfo.isStarred = true;
         await this.userBooksRepository.save(bookInfo);
     }
