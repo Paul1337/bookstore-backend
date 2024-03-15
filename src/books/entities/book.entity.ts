@@ -5,11 +5,13 @@ import {
     Entity,
     ManyToMany,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
 import { BookStatus } from '../enums/book-status.enum';
 import { BookSeries } from './book-series.entity';
+import { BookPart } from './book-part.entity';
 
 @Entity()
 export class Book {
@@ -76,6 +78,9 @@ export class Book {
         nullable: true,
     })
     series?: BookSeries;
+
+    @OneToMany(() => BookPart, part => part.book)
+    parts: BookPart[];
 
     @Column({ type: 'int4', nullable: true })
     seriesId: number;

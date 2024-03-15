@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Book } from '../entities/book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserBooks } from '../entities/user-books.entity';
@@ -14,24 +14,34 @@ export class BooksLibService {
     async getUserBookInfo(bookId: number, userId: number) {
         let bookInfo = await this.userBooksRepository.findOne({
             where: {
-                book_id: bookId,
-                user_id: userId,
+                bookId: bookId,
+                userId: userId,
             },
         });
 
         if (!bookInfo) {
             bookInfo = this.userBooksRepository.create({
-                book_id: bookId,
-                user_id: userId,
+                bookId: bookId,
+                userId: userId,
                 isStarred: false,
                 isInLibrary: false,
                 isPaid: false,
                 isViewed: false,
-                currentPage: -1,
+                currentPart: 1,
+                currentPage: 1,
             });
-            // await this.userBooksRepository.save(bookInfo);
         }
 
         return bookInfo;
+    }
+
+    async createOrUpdateUserbookInfo(bookId: number, userId: number, data: DeepPartial<UserBooks>) {
+        const bookInfo = await this.getUserBookInfo(bookId, userId);
+
+        for (let prop in data) {
+            bookInfo[prop] = data[prop];
+        }
+
+        await this.userBooksRepository.save(bookInfo);
     }
 }

@@ -5,6 +5,7 @@ import { Public } from 'src/auth/decorators/public.decorator';
 import { GetPagesDto } from './dto/get-pages.dto';
 import { RequestExtended } from 'src/auth/lib/request-extension';
 import { GetPageResponse } from './responses/get-pages.response';
+import { GetPartDto } from './dto/get-part.dto';
 
 @Controller('books')
 @ApiTags('book-read')
@@ -13,25 +14,32 @@ export class BookReadController {
 
     @Get(':bookId/pages')
     @Public()
-    // @ApiOperation({
-    //     summary: 'Получение диапазона страниц определённой книги',
-    //     description:
-    //         'Если какие-то страницы из диапазона не доступны пользователю, они не будут возвращены.',
-    // })
-    // @ApiOkResponse({
-    // schema: GetPageResponse,
-    // isArray: true,
-    // })
+    @ApiOperation({
+        summary: 'Получение диапазона страниц определённой книги, с указанием активной страницы',
+        description:
+            'Если какие-то страницы из диапазона не доступны пользователю, они не будут возвращены.',
+    })
     async getPages(
         @Query() getPagesDto: GetPagesDto,
         @Param('bookId') bookId: number,
         @Req() req: RequestExtended,
     ) {
-        const userId = req.user?.id;
-        if (userId) {
-            return this.bookReadService.getPagesPrivate(getPagesDto, bookId, userId);
-        } else {
-            return this.bookReadService.getPagesPublic(getPagesDto, bookId);
-        }
+        return this.bookReadService.getPages(getPagesDto, bookId, req.user?.id);
+    }
+
+    @Get(':bookId/part/:partIndex')
+    @Public()
+    @ApiOperation({
+        summary:
+            'Получение главы определённой книги - мета информация о главе + первые несколько страниц',
+        description: 'Если глава не доступна пользователю, вернёт ошибку.',
+    })
+    async getBookPart(
+        @Query() getPartDto: GetPartDto,
+        @Param('bookId') bookId: number,
+        @Param('partIndex') partIndex: number,
+        @Req() req: RequestExtended,
+    ) {
+        return this.bookReadService.getPart(getPartDto, bookId, partIndex, req.user?.id);
     }
 }

@@ -1,13 +1,15 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '../entities/book.entity';
-import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Brackets, Repository } from 'typeorm';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { GetPagesDto } from './dto/get-pages.dto';
 import { BookPage } from '../entities/book-page.entity';
 import { BookPart } from '../entities/book-part.entity';
 import { BooksLibService } from '../books-lib/books-lib.service';
 import { UserBooks } from '../entities/user-books.entity';
 import { GetPageResponse, GetPagesResponse } from './responses/get-pages.response';
+import { GetPartDto } from './dto/get-part.dto';
+import { GetPartResponse } from './responses/get-part.response';
 
 @Injectable()
 export class BookReadService {
@@ -15,50 +17,31 @@ export class BookReadService {
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         @InjectRepository(BookPage) private bookPageRepository: Repository<BookPage>,
         @InjectRepository(BookPart) private bookPartRepository: Repository<BookPart>,
+        @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
         private bookLibService: BooksLibService,
     ) {}
 
-    // can possibly add validation to make sure pageFrom is less or equal to pageTo
-    async getPagesPublic(getPagesDto: GetPagesDto, bookId: number): Promise<GetPagesResponse> {
-        // can only access free pages
-        const { pageFrom, pageTo } = getPagesDto;
-
-        const pages = await this.bookPageRepository
-            .createQueryBuilder('bookPage')
-            .leftJoin(Book, 'book', 'book.id = bookPage.book_id')
-            .leftJoinAndSelect(BookPart, 'bookPart', 'bookPart.id = bookPage.book_part_id')
-            .where('bookPage.book_id = :bookId', { bookId })
-            .andWhere('bookPart.index <= book.freeChaptersCount')
-            .skip(pageFrom - 1)
-            .take(pageTo - pageFrom + 1)
-            .addOrderBy('bookPart.index', 'ASC')
-            .addOrderBy('bookPage.index', 'ASC')
-            .getMany();
-
-        // console.log(
-        //     'get pages public',
-        //     pages.map(page => ({
-        //         ind: page.index,
-        //         bookId: page.bookId,
-        //         partId: page.bookPartId,
-        //     })),
-        // );
-        return pages.map(this.mapPageToResponse);
-    }
-
-    async getPagesPrivate(
+    async getPages(
         getPagesDto: GetPagesDto,
         bookId: number,
-        userId: number,
+        userId?: number,
     ): Promise<GetPagesResponse> {
-        // can access free pages and others if book is paid
+        const { currentPage, pageFrom, pageTo } = getPagesDto;
 
-        const { pageFrom, pageTo } = getPagesDto;
+        if (pageFrom > pageTo) {
+            throw new BadRequestException('Invalid data: pageFrom is greater than pageTo');
+        }
+
+        if (currentPage < pageFrom || currentPage > pageTo) {
+            throw new BadRequestException(
+                'Invalid data: currentPage is not in the range [pageFrom, pageTo]',
+            );
+        }
 
         const pages = await this.bookPageRepository
             .createQueryBuilder('bookPage')
-            .leftJoin(Book, 'book', 'book.id = bookPage.book_id')
-            .leftJoinAndSelect(BookPart, 'bookPart', 'bookPart.id = bookPage.book_part_id')
+            .leftJoinAndSelect('bookPage.book', 'book')
+            .leftJoinAndSelect('bookPage.bookPart', 'bookPart')
             .leftJoin(
                 UserBooks,
                 'bookInfo',
@@ -66,23 +49,78 @@ export class BookReadService {
                 { userId },
             )
             .where('bookPage.book_id = :bookId', { bookId })
-            .andWhere('bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount')
-            .skip(pageFrom - 1)
-            .take(pageTo - pageFrom + 1)
+            .andWhere('(bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount OR book.cost = 0)')
+            .offset(pageFrom - 1)
+            .limit(pageTo - pageFrom + 1)
             .addOrderBy('bookPart.index', 'ASC')
             .addOrderBy('bookPage.index', 'ASC')
             .getMany();
 
-        console.log('get pages private', pages);
+        // console.log(
+        //     pages.map(p => ({
+        //         index: p.index,
+        //         book: p.bookId,
+        //     })),
+        // );
 
-        return pages.map(this.mapPageToResponse);
-    }
+        const selectedCurrentPage = pages.find(page => page.index === currentPage);
+        if (!selectedCurrentPage) throw new ForbiddenException('Current page can not be selected');
 
-    mapPageToResponse(page: BookPage): GetPageResponse {
-        return {
+        if (userId) {
+            await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, {
+                currentPage,
+                currentPart: selectedCurrentPage.bookPart.index,
+            });
+        }
+
+        return pages.map(page => ({
             id: page.id,
             content: page.content,
             index: page.index,
+            partIndex: page.bookPart.index,
+        }));
+    }
+
+    async getPart(
+        getPartDto: GetPartDto,
+        bookId: number,
+        partIndex: number,
+        userId?: number,
+    ): Promise<GetPartResponse> {
+        const { pagesCount } = getPartDto;
+
+        console.log('partIndex:', partIndex);
+
+        const bookPart = await this.bookPartRepository
+            .createQueryBuilder('bookPart')
+            .leftJoinAndSelect('bookPart.book', 'book')
+            .leftJoinAndSelect('bookPart.pages', 'bookPage')
+            .leftJoin(
+                UserBooks,
+                'bookInfo',
+                'bookInfo.user_id = :userId AND bookInfo.book_id = bookPage.book_id',
+                { userId },
+            )
+            .andWhere('bookPart.index = :partIndex', { partIndex })
+            .andWhere('bookPart.book_id = :bookId', { bookId })
+            .andWhere('(bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount OR book.cost = 0)')
+            .limit(pagesCount)
+            .addOrderBy('bookPart.index', 'ASC')
+            .addOrderBy('bookPage.index', 'ASC')
+            .printSql()
+            .getOne();
+
+        if (!bookPart?.pages?.length) throw new ForbiddenException('This book part is not allowed');
+
+        return {
+            firstPageIndex: bookPart.pages[0].index,
+            lastPageIndex: bookPart.pages[0].index,
+            pages: bookPart.pages.map(page => ({
+                id: page.id,
+                content: page.content,
+                index: page.index,
+                partIndex: bookPart.index,
+            })),
         };
     }
 }
