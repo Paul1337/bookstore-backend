@@ -49,7 +49,7 @@ export class BookReadService {
                 { userId },
             )
             .where('bookPage.book_id = :bookId', { bookId })
-            .andWhere('bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount')
+            .andWhere('(bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount OR book.cost = 0)')
             .offset(pageFrom - 1)
             .limit(pageTo - pageFrom + 1)
             .addOrderBy('bookPart.index', 'ASC')
@@ -89,6 +89,8 @@ export class BookReadService {
     ): Promise<GetPartResponse> {
         const { pagesCount } = getPartDto;
 
+        console.log('partIndex:', partIndex);
+
         const bookPart = await this.bookPartRepository
             .createQueryBuilder('bookPart')
             .leftJoinAndSelect('bookPart.book', 'book')
@@ -99,16 +101,16 @@ export class BookReadService {
                 'bookInfo.user_id = :userId AND bookInfo.book_id = bookPage.book_id',
                 { userId },
             )
-            .where('bookPart.book_id = :bookId', { bookId })
             .andWhere('bookPart.index = :partIndex', { partIndex })
-            .andWhere('(bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount)')
+            .andWhere('bookPart.book_id = :bookId', { bookId })
+            .andWhere('(bookInfo.isPaid OR bookPart.index <= book.freeChaptersCount OR book.cost = 0)')
             .limit(pagesCount)
             .addOrderBy('bookPart.index', 'ASC')
             .addOrderBy('bookPage.index', 'ASC')
+            .printSql()
             .getOne();
 
-        if (!bookPart) throw new BadRequestException('Book part not found');
-        if (bookPart.pages.length === 0) throw new ForbiddenException('This book part is not allowed');
+        if (!bookPart?.pages?.length) throw new ForbiddenException('This book part is not allowed');
 
         return {
             firstPageIndex: bookPart.pages[0].index,
