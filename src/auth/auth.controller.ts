@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, Req, UnauthorizedException } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    Post,
+    Redirect,
+    Req,
+    Res,
+    UnauthorizedException,
+    UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -7,11 +17,18 @@ import { RequestExtended } from './lib/request-extension';
 import { Roles } from './decorators/roles.decorator';
 import { AllRoles } from './enums/role.enum';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthGoogleService } from './auth-google.service';
+import passport from 'passport';
+import { Response } from 'express';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly authGoogleService: AuthGoogleService,
+    ) {}
 
     @Post('/login')
     @Public()
@@ -41,5 +58,23 @@ export class AuthController {
             return req['user'];
         }
         throw new UnauthorizedException();
+    }
+
+    @Get('google')
+    @Public()
+    @UseGuards(AuthGuard('google'))
+    async googleAuth(@Req() req: RequestExtended) {
+        console.log('req', req);
+        // const res = passport.authenticate('google');
+        // console.log(res);
+        // return 'ok';
+    }
+
+    @Get('google/redirect')
+    @Public()
+    @UseGuards(AuthGuard('google'))
+    async googleAuthRedirect(@Req() req: RequestExtended, @Res() res: Response) {
+        const { jwtToken } = await this.authGoogleService.googleAuthUser(req.user);
+        return res.redirect(`http://localhost:5173/?jwtToken=${jwtToken}`);
     }
 }

@@ -18,6 +18,9 @@ export class User {
     @PrimaryGeneratedColumn({ type: 'int4' })
     id: number;
 
+    @Column({ type: 'varchar', nullable: true })
+    google_id: string;
+
     @CreateDateColumn()
     createdAt: Date;
 
@@ -33,7 +36,7 @@ export class User {
     @Column({ type: 'varchar', length: 64 })
     username: string;
 
-    @Column({ type: 'varchar', length: 1024 })
+    @Column({ type: 'varchar', length: 1024, nullable: true })
     password: string;
 
     @JoinTable({ name: 'user_roles' })
