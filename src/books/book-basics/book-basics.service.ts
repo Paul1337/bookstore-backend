@@ -68,7 +68,7 @@ export class BookBasicsService {
                     updatedAt: part.updatedAt,
                     isFree: index + 1 <= bookWithRelations.freeChaptersCount,
                 })),
-            genres: bookWithRelations.genres?.map(g => g.name) ?? [],
+            genres: bookWithRelations.genres?.map((g) => g.name) ?? [],
         };
     }
 
