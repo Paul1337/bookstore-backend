@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { BookGenre } from 'src/books/entities/book-genre';
 import { BookPage } from 'src/books/entities/book-page.entity';
 import { BookPart } from 'src/books/entities/book-part.entity';
 import { BookSeries } from 'src/books/entities/book-series.entity';
@@ -21,7 +22,8 @@ const options: DataSourceOptions & SeederOptions = {
     username: DB_USER,
     password: DB_PASSWORD,
 
-    entities: [BookPage, BookPart, Book, BookSeries, User, UserRole, UserProfile],
+    // entities: [BookPage, BookPart, Book, BookSeries, BookGenre, User, UserRole, UserProfile],
+    // entities: ['src/**/*.entity.ts'],
     seeds: ['src/db/seeders/*.ts'],
     factories: ['src/db/factories/*.ts'],
 

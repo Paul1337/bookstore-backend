@@ -1,4 +1,5 @@
 export enum BookStatus {
-    InWork = 'in work',
+    Unfinished = 'unfinished',
     Finished = 'finished',
+    Frozen = 'frozen',
 }

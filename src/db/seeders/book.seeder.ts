@@ -60,8 +60,8 @@ export default class BookSeeder implements Seeder {
                     for (let k = 0; k < pagesCount; k++) {
                         const page = await bookPageFactory.make();
                         page.bookPartId = bookPart.id;
-                        page.bookId = book.id;
-                        page.index = ++lastPageInd;
+                        // page.index = ++lastPageInd;
+                        page.index = k + 1;
                         await bookPageFactory.save(page);
                     }
                 }

@@ -20,7 +20,7 @@ export default setSeederFactory(Book, faker => {
         book.freeChaptersCount = faker.number.int({ min: 0, max: 20 });
     }
 
-    book.status = Math.random() < 0.5 ? BookStatus.Finished : BookStatus.InWork;
+    book.status = Math.random() < 0.5 ? BookStatus.Finished : BookStatus.Unfinished;
     book.isPublished = Math.random() < 0.5;
     book.isBanned = Math.random() < 0.2;
 

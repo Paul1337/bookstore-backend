@@ -33,8 +33,8 @@ export class UserBooks {
     @Column({ type: 'int4', default: 1 })
     currentPage: number;
 
-    @Column({ type: 'int4', default: 1 })
-    currentPart: number;
+    // @Column({ type: 'int4', default: 1 })
+    // currentPart: number;
 
     @Column({ type: 'bool' })
     isPaid: boolean;

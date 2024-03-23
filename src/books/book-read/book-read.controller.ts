@@ -27,19 +27,18 @@ export class BookReadController {
         return this.bookReadService.getPages(getPagesDto, bookId, req.user?.id);
     }
 
-    @Get(':bookId/part/:partIndex')
+    @Get(':bookId/part/:bookPartId')
     @Public()
     @ApiOperation({
-        summary:
-            'Получение главы определённой книги - мета информация о главе + первые несколько страниц',
+        summary: 'Получение информации о главе и несколько первых страниц',
         description: 'Если глава не доступна пользователю, вернёт ошибку.',
     })
     async getBookPart(
         @Query() getPartDto: GetPartDto,
+        @Param('bookPartId') bookPartId: number,
         @Param('bookId') bookId: number,
-        @Param('partIndex') partIndex: number,
         @Req() req: RequestExtended,
     ) {
-        return this.bookReadService.getPart(getPartDto, bookId, partIndex, req.user?.id);
+        return this.bookReadService.getPart(getPartDto, bookId, bookPartId, req.user?.id);
     }
 }

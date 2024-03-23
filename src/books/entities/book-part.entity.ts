@@ -19,14 +19,14 @@ export class BookPart {
     @Column({ type: 'varchar', length: 128 })
     title: string;
 
-    @Column({ type: 'int4' })
+    @Column({ type: 'numeric' })
     index: number;
 
-    @ManyToOne(type => Book)
+    @ManyToOne(type => Book, book => book.parts, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'book_id' })
     book: Book;
 
-    @OneToMany(() => BookPage, page => page.bookPart)
+    @OneToMany(() => BookPage, page => page.bookPart, { cascade: ['remove'] })
     pages: BookPage[];
 
     @Column({ type: 'int4' })

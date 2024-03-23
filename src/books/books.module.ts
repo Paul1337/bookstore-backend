@@ -5,17 +5,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { BookSeries } from './entities/book-series.entity';
 import { UserBooks } from './entities/user-books.entity';
-import { BookWriteService } from './book-write/book-write.service';
 import { BookReadService } from './book-read/book-read.service';
 import { BooksLibService } from './books-lib/books-lib.service';
 import { BookCatalogService } from './book-catalog/book-catalog.service';
 import { BookPage } from './entities/book-page.entity';
 import { BookPart } from './entities/book-part.entity';
 import { BookReadController } from './book-read/book-read.controller';
+import { BookWriteController } from './book-write/book-write.controller';
+import { BookGenre } from './entities/book-genre';
+import { BookAuthorGuard } from './book-write/guards/book-author.guard';
+import { BookWriteService } from './book-write/book-write.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Book, BookSeries, UserBooks, BookPage, BookPart])],
-    controllers: [BookReadController, BookBasicsController],
+    imports: [TypeOrmModule.forFeature([Book, BookSeries, UserBooks, BookPage, BookPart, BookGenre])],
+    controllers: [BookReadController, BookWriteController, BookBasicsController],
     providers: [
         BookBasicsService,
         BookWriteService,
@@ -24,6 +27,7 @@ import { BookReadController } from './book-read/book-read.controller';
         BooksLibService,
         BookPage,
         BookPart,
+        BookAuthorGuard,
     ],
 })
 export class BooksModule {}

@@ -1,7 +1,6 @@
 import { IsNumber, IsOptional } from 'class-validator';
 
-export class GetPartDto {
-    @IsNumber()
+export class UpdatePartDto {
     @IsOptional()
-    pagesCount: number;
+    title?: string;
 }

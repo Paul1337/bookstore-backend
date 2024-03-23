@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { Book } from '../entities/book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserBooks } from '../entities/user-books.entity';
+import { BookGenre } from '../entities/book-genre';
 
 @Injectable()
 export class BooksLibService {
     constructor(
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
+        @InjectRepository(BookGenre) private bookGenreRepository: Repository<BookGenre>,
     ) {}
 
     async getUserBookInfo(bookId: number, userId: number) {
@@ -27,7 +29,7 @@ export class BooksLibService {
                 isInLibrary: false,
                 isPaid: false,
                 isViewed: false,
-                currentPart: 1,
+                // currentPart: 1,
                 currentPage: 1,
             });
         }
@@ -43,5 +45,13 @@ export class BooksLibService {
         }
 
         await this.userBooksRepository.save(bookInfo);
+    }
+
+    async findBookGenresByNames(genres: string[]) {
+        return await this.bookGenreRepository.find({
+            where: {
+                name: In(genres),
+            },
+        });
     }
 }

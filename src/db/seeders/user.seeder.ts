@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 
 export default class UserSeeder implements Seeder {
-    private readonly UsersCount = 1;
+    private readonly UsersCount = 0;
 
     public async run(dataSource: DataSource, factoryManager: SeederFactoryManager): Promise<void> {
         console.log('Running user seeder :)');

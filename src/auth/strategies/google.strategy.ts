@@ -8,10 +8,11 @@ import { Role } from '../enums/role.enum';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     constructor(private configService: ConfigService) {
+        const host = `${configService.get('SERVER_HOST')}:${configService.get('SERVER_PORT')}`;
         super({
             clientID: configService.get('GOOGLE_CLIENT_ID'),
             clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
-            callbackURL: 'http://localhost:8007/auth/google/redirect',
+            callbackURL: `${host}/auth/google/redirect`,
             scope: ['email', 'profile'],
         });
     }
