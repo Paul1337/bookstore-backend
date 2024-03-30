@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserPayloadScheme } from './lib/request-extension';
+import { GoogleUserScheme, UserPayloadScheme } from './lib/request-extension';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
@@ -14,32 +14,33 @@ export class AuthGoogleService {
         private jwtService: JwtService,
         @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(UserRole) private userRoleRepository: Repository<UserRole>,
-        @InjectRepository(UserProfile) private userProfileRepository: Repository<UserProfile>,
     ) {}
 
-    async googleAuthUser(userPayload: UserPayloadScheme) {
-        // 1. select that user from database
-        // 2.1 if no -> we should create user
-        // 2.2 if found -> nothing to create
-        // anyway we generate jwt token
-
-        const user = await this.userRepository.findOne({
-            where: { google_id: userPayload.id.toString() },
+    async googleAuthUser(googleUser: GoogleUserScheme) {
+        console.log('google user', googleUser);
+        let user = await this.userRepository.findOne({
+            where: { googleId: googleUser.googleId },
+            relations: ['roles'],
         });
+
         if (!user) {
             const userRole = await this.userRoleRepository.findOne({ where: { name: Role.User } });
-            // const userProfile = await this.userProfileRepository.create({});
-            await this.userRepository.insert({
-                google_id: userPayload.id.toString(),
-                email: userPayload.email,
-                username: userPayload.username,
+            user = this.userRepository.create({
+                googleId: googleUser.googleId,
+                email: googleUser.email,
+                username: googleUser.username,
                 roles: [userRole],
-                // profile: userProfile,
             });
+            await this.userRepository.save(user);
         }
 
         return {
-            jwtToken: await this.jwtService.signAsync(userPayload),
+            jwtToken: await this.jwtService.signAsync({
+                email: user.email,
+                id: user.id,
+                roles: user.roles.map(role => role.name) as Role[],
+                username: user.username,
+            } as UserPayloadScheme),
         };
     }
 }

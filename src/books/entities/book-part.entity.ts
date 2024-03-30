@@ -12,6 +12,7 @@ import { BookPage } from './book-page.entity';
 
 @Entity()
 @Unique(['index', 'bookId'])
+@Unique(['title', 'bookId'])
 export class BookPart {
     @PrimaryGeneratedColumn({ type: 'int4' })
     id: number;

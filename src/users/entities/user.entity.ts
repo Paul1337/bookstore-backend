@@ -19,7 +19,7 @@ export class User {
     id: number;
 
     @Column({ type: 'varchar', nullable: true })
-    google_id: string;
+    googleId: string;
 
     @CreateDateColumn()
     createdAt: Date;

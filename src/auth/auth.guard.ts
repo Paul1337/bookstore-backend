@@ -30,8 +30,15 @@ export class AuthGuard implements CanActivate {
             request['user'] = userPayload;
 
             if (isPublic) return true;
-            if (!requiredRoles) return false;
-            return requiredRoles.some(role => userPayload.roles.includes(role));
+            if (!requiredRoles) throw new UnauthorizedException('No roles are allowed to the endpoint!');
+            const roleAllowed = requiredRoles.some(role => userPayload.roles.includes(role));
+
+            if (!roleAllowed) {
+                throw new UnauthorizedException(
+                    `User does not have one of required roles: ${requiredRoles.join(', ')}`,
+                );
+            }
+            return true;
         } else {
             if (!isPublic) throw new UnauthorizedException();
             return isPublic;

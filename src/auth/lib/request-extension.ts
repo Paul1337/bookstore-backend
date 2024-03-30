@@ -11,3 +11,13 @@ export interface UserPayloadScheme {
 export interface RequestExtended extends Request {
     user?: UserPayloadScheme;
 }
+
+export interface GoogleUserScheme {
+    username: string;
+    email: string;
+    googleId: string;
+}
+
+export interface RequestWithGoogle extends Request {
+    googleUser: GoogleUserScheme;
+}

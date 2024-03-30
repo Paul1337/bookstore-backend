@@ -8,9 +8,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { AuthGoogleService } from './auth-google.service';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
     imports: [
+        PassportModule.register({ property: 'googleUser' }),
         UsersModule,
         JwtModule.registerAsync({
             useFactory: (config: ConfigService) => {

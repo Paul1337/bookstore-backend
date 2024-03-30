@@ -59,7 +59,10 @@ export class BookBasicsService {
             starsCount: Number(bookInfo.starsCount),
             viewsCount: Number(bookInfo.viewsCount),
             paidCount: Number(bookInfo.paidCount),
-            parts: bookWithRelations.parts.map(part => part.title),
+            parts: bookWithRelations.parts.map(part => ({
+                id: part.id,
+                title: part.title,
+            })),
         };
     }
 
@@ -77,6 +80,7 @@ export class BookBasicsService {
             isStarred: bookInfo.isStarred,
             isInLibrary: bookInfo.isInLibrary,
             currentPage: bookInfo.currentPage,
+            currentPart: bookInfo.currentPart,
         };
     }
 

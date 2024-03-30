@@ -1,6 +1,15 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Book } from 'src/books/entities/book.entity';
+import { BookPart } from './book-part.entity';
 
 @Entity()
 export class UserBooks {
@@ -33,8 +42,12 @@ export class UserBooks {
     @Column({ type: 'int4', default: 1 })
     currentPage: number;
 
-    // @Column({ type: 'int4', default: 1 })
-    // currentPart: number;
+    @ManyToOne(type => BookPart, { nullable: true })
+    @JoinColumn({ name: 'current_part_id' })
+    currentPart: BookPart;
+
+    // @Column({ type: 'int4', nullable: true })
+    // currentPartId: number;
 
     @Column({ type: 'bool' })
     isPaid: boolean;

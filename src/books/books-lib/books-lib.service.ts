@@ -4,12 +4,14 @@ import { Book } from '../entities/book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserBooks } from '../entities/user-books.entity';
 import { BookGenre } from '../entities/book-genre';
+import { BookPart } from '../entities/book-part.entity';
 
 @Injectable()
 export class BooksLibService {
     constructor(
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
+        @InjectRepository(BookPart) private bookPartRepository: Repository<BookPart>,
         @InjectRepository(BookGenre) private bookGenreRepository: Repository<BookGenre>,
     ) {}
 
@@ -19,9 +21,14 @@ export class BooksLibService {
                 bookId: bookId,
                 userId: userId,
             },
+            relations: ['currentPart'],
         });
 
         if (!bookInfo) {
+            const firstPart = await this.bookPartRepository.findOne({
+                where: { bookId },
+                order: { index: 'ASC' },
+            });
             bookInfo = this.userBooksRepository.create({
                 bookId: bookId,
                 userId: userId,
@@ -29,7 +36,7 @@ export class BooksLibService {
                 isInLibrary: false,
                 isPaid: false,
                 isViewed: false,
-                // currentPart: 1,
+                currentPart: firstPart,
                 currentPage: 1,
             });
         }

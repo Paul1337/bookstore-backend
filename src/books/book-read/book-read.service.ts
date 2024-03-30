@@ -37,6 +37,10 @@ export class BookReadService {
             );
         }
 
+        if (pageFrom < 1) {
+            throw new BadRequestException('Page from must be at least 1');
+        }
+
         const freeBookPartIds = await this.getFreeBookPartsIds(bookId);
 
         const pages = await this.bookPageRepository
@@ -50,9 +54,10 @@ export class BookReadService {
                 { userId },
             )
             .where('bookPart.book_id = :bookId', { bookId })
-            .andWhere('(bookInfo.isPaid OR book.cost = 0 OR bookPart.id IN (:...ids))', {
-                ids: freeBookPartIds,
-            })
+            .andWhere(
+                '(bookInfo.isPaid OR book.cost = 0 OR book.authorId = :userId OR bookPart.id IN (:...freeBookPartIds))',
+                { freeBookPartIds, userId },
+            )
             .offset(pageFrom - 1)
             .limit(pageTo - pageFrom + 1)
             .addOrderBy('bookPart.index', 'ASC')
@@ -63,7 +68,11 @@ export class BookReadService {
         if (!selectedCurrentPage) throw new ForbiddenException('Current page can not be selected');
 
         if (userId) {
-            await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, { currentPage });
+            await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, {
+                currentPage,
+                currentPart: selectedCurrentPage.bookPart,
+                // currentPartId: selectedCurrentPage.bookPartId,
+            });
         }
 
         return pages.map((page, index) => ({
@@ -83,21 +92,21 @@ export class BookReadService {
 
         const bookPart = await this.bookPartRepository.findOne({ where: { id: bookPartId, bookId } });
         if (!bookPart) throw new BadRequestException('That part does not exist for this book');
-        const prevPartsPages = await this.bookPageRepository
+        const prevParts = await this.bookPageRepository
             .createQueryBuilder('bookPage')
-            // .select()
-            .leftJoinAndSelect('bookPage.bookPart', 'bookPart')
+            .select('COUNT(*)', 'count')
+            .leftJoin('bookPage.bookPart', 'bookPart')
             .where('bookPart.index < :bookPartIndex', { bookPartIndex: bookPart.index })
             .andWhere('bookPart.book_id = :bookId', { bookId })
-            .getMany();
+            .getRawOne();
 
         const currentPartPages = await this.bookPageRepository.find({
             where: { bookPartId: bookPartId },
             select: ['id'],
         });
 
-        const firstPageIndex = prevPartsPages.length + 1;
-        const lastPageIndex = prevPartsPages.length + currentPartPages.length;
+        const firstPageIndex = Number(prevParts.count) + 1;
+        const lastPageIndex = Number(prevParts.count) + currentPartPages.length;
 
         let pages = [];
         if (pagesCount > 0) {

@@ -13,7 +13,7 @@ import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LogInUserDto } from './dto/log-in-user.dto';
-import { RequestExtended } from './lib/request-extension';
+import { RequestExtended, RequestWithGoogle } from './lib/request-extension';
 import { Roles } from './decorators/roles.decorator';
 import { AllRoles } from './enums/role.enum';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -53,7 +53,7 @@ export class AuthController {
     @ApiOperation({
         summary: 'Получение первичных данных пользователя, если неавторизован - вернёт ошибку',
     })
-    async init(@Req() req: RequestExtended) {
+    async getMe(@Req() req: RequestExtended) {
         if (req['user']) {
             return req['user'];
         }
@@ -65,16 +65,13 @@ export class AuthController {
     @UseGuards(AuthGuard('google'))
     async googleAuth(@Req() req: RequestExtended) {
         console.log('req', req);
-        // const res = passport.authenticate('google');
-        // console.log(res);
-        // return 'ok';
     }
 
     @Get('google/redirect')
     @Public()
     @UseGuards(AuthGuard('google'))
-    async googleAuthRedirect(@Req() req: RequestExtended, @Res() res: Response) {
-        const { jwtToken } = await this.authGoogleService.googleAuthUser(req.user);
+    async googleAuthRedirect(@Req() req: RequestWithGoogle, @Res() res: Response) {
+        const { jwtToken } = await this.authGoogleService.googleAuthUser(req.googleUser);
         return res.redirect(`http://localhost:5173/?jwtToken=${jwtToken}`);
     }
 }

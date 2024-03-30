@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Injectable, Param, ParseIntPipe, Query, Req } from '@nestjs/common';
-import { BookReadService } from './book-read.service';
-import { ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { GetPagesDto } from './dto/get-pages.dto';
 import { RequestExtended } from 'src/auth/lib/request-extension';
-import { GetPageResponse } from './responses/get-pages.response';
+import { BookReadService } from './book-read.service';
+import { GetPagesDto } from './dto/get-pages.dto';
 import { GetPartDto } from './dto/get-part.dto';
 
 @Controller('books')
@@ -30,7 +29,7 @@ export class BookReadController {
     @Get(':bookId/part/:bookPartId')
     @Public()
     @ApiOperation({
-        summary: 'Получение информации о главе и несколько первых страниц',
+        summary: 'Получение информации о главе и несколько первых страниц (опционально)',
         description: 'Если глава не доступна пользователю, вернёт ошибку.',
     })
     async getBookPart(
