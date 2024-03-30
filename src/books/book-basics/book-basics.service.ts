@@ -127,4 +127,11 @@ export class BookBasicsService {
     async removeBookFromLibrary(bookId: number, userId: number) {
         await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, { isInLibrary: false });
     }
+
+    async getMyBooks(userId: number) {
+        const books = await this.bookRepository.find({
+            where: { authorId: userId },
+        });
+        return books;
+    }
 }

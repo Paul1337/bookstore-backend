@@ -21,6 +21,15 @@ export class BookBasicsController {
         return this.bookBasicsService.getMyLibrary(request.user.id);
     }
 
+    @Get('my')
+    @Roles(Role.User)
+    @ApiOperation({
+        summary: 'Получение списка книг, написанных текущим пользователем',
+    })
+    async getMyBooks(@Req() request: RequestExtended) {
+        return this.bookBasicsService.getMyBooks(request.user.id);
+    }
+
     @Get(':bookId')
     @Public()
     @ApiOperation({
