@@ -8,12 +8,16 @@ import { GetPublicBookInfoResponse } from './responses/get-public-book-info.resp
 import { GetPrivateBookInfoResponse } from './responses/get-private-book-info.response';
 import { User } from 'src/users/entities/user.entity';
 import { GetMyLibraryResponse } from './responses/get-my-library.response';
+import { BookGenre } from '../entities/book-genre';
+import { BookSeries } from '../entities/book-series.entity';
 
 @Injectable()
 export class BookBasicsService {
     constructor(
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
+        @InjectRepository(BookGenre) private bookGenreRepository: Repository<BookGenre>,
+        @InjectRepository(BookSeries) private bookSeriesRepository: Repository<BookSeries>,
         private bookLibService: BooksLibService,
     ) {}
 
@@ -133,5 +137,15 @@ export class BookBasicsService {
             where: { authorId: userId },
         });
         return books;
+    }
+
+    async getAllGenres(): Promise<BookGenre[]> {
+        return this.bookGenreRepository.find();
+    }
+
+    async getMySeries(userId: number): Promise<BookSeries[]> {
+        return this.bookSeriesRepository.find({
+            where: { authorId: userId },
+        });
     }
 }

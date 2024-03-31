@@ -13,6 +13,9 @@ export class BookSeries {
     @ManyToOne(() => User, user => user.writtenBooks)
     author: User;
 
+    @Column('int4')
+    authorId: number;
+
     @OneToMany(() => Book, book => book.series)
     books: Book[];
 }

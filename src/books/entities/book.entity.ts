@@ -1,6 +1,7 @@
 import { User } from 'src/users/entities/user.entity';
 import {
     Column,
+    CreateDateColumn,
     Entity,
     JoinTable,
     ManyToMany,
@@ -42,7 +43,7 @@ export class Book {
     @JoinTable({ name: 'book_genres' })
     genres: BookGenre[];
 
-    @Column({ type: 'timestamp', nullable: true })
+    @CreateDateColumn({ type: 'timestamp', nullable: true })
     createdAt: Date;
 
     @Column({ type: 'timestamp', nullable: true })

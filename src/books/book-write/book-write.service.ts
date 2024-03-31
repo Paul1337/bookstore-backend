@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '../entities/book.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, MoreThan, Repository } from 'typeorm';
 import { BookGenre } from '../entities/book-genre';
 import { BookPart } from '../entities/book-part.entity';
 import { BookPage } from '../entities/book-page.entity';
@@ -116,33 +116,44 @@ export class BookWriteService {
     }
 
     async createPage(bookPartId: number, createPageDto: CreatePageDto): Promise<CreatePageResponse> {
-        const lastPage = await this.bookPageRepository.findOne({
-            where: { bookPartId },
-            order: { index: 'DESC' },
-        });
-        const lastPageIndex = Number(lastPage?.index ?? 0);
-        let newIndex = lastPageIndex + 1;
+        let newIndex = null;
 
-        if (createPageDto.between) {
-            const pages = await this.bookPageRepository.find({
+        if (createPageDto.prevPageId) {
+            const prevPage = await this.bookPageRepository.findOne({
+                where: { bookPartId, id: createPageDto.prevPageId },
+            });
+            if (!prevPage) throw new BadRequestException('Invalid prev page id');
+
+            const nextPage = await this.bookPageRepository.findOne({
                 where: {
                     bookPartId,
-                    id: In([createPageDto.between.prevPageId, createPageDto.between.nextPageId]),
+                    index: MoreThan(prevPage.index),
                 },
+                order: { index: 'ASC' },
             });
 
-            if (pages.length !== 2) throw new BadRequestException('Invalid prevPage / nextPage ids');
-            newIndex = (Number(pages[0].index) + Number(pages[1].index)) / 2;
+            if (!nextPage) {
+                newIndex = Number(prevPage.index) + 1;
+            } else {
+                newIndex = (Number(prevPage.index) + Number(nextPage.index)) / 2;
+            }
+        } else {
+            const lastPage = await this.bookPageRepository.findOne({
+                where: { bookPartId },
+                order: { index: 'DESC' },
+            });
+            const lastPageIndex = Number(lastPage?.index ?? 0);
+            newIndex = lastPageIndex + 1;
         }
+
+        if (!newIndex) throw new BadRequestException('Invalid data');
 
         const insertResult = await this.bookPageRepository.insert({
             bookPartId,
             index: newIndex,
         });
 
-        return {
-            pageId: insertResult.identifiers[0].id,
-        };
+        return { pageId: insertResult.identifiers[0].id };
     }
 
     async updatePage(bookPageId: number, updatePageDto: UpdatePageDto) {

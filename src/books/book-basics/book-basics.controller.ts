@@ -30,6 +30,24 @@ export class BookBasicsController {
         return this.bookBasicsService.getMyBooks(request.user.id);
     }
 
+    @Get('genres')
+    @Public()
+    @ApiOperation({
+        summary: 'Получение всех жанров на платформе',
+    })
+    async getAllGenres() {
+        return this.bookBasicsService.getAllGenres();
+    }
+
+    @Get('mySeries')
+    @Public()
+    @ApiOperation({
+        summary: 'Получение циклов книг текущего пользователя на платформе',
+    })
+    async getMySeries(@Req() request: RequestExtended) {
+        return this.bookBasicsService.getMySeries(request.user.id);
+    }
+
     @Get(':bookId')
     @Public()
     @ApiOperation({
