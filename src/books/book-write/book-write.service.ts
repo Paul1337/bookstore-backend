@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '../entities/book.entity';
@@ -13,6 +13,9 @@ import { CreatePartDto } from './dto/create-part.dto';
 import { UpdatePartDto } from './dto/update-part.dto';
 import { UpdatePartsOrderDto } from './dto/update-parts-order.dto';
 import { UpdatePageDto } from './dto/update-page-dto';
+import { CreateBookResponse } from './responses/create-book.response';
+import { CreatePartResponse } from './responses/create-part.response';
+import { CreatePageResponse } from './responses/create-page.response';
 
 @Injectable()
 export class BookWriteService {
@@ -24,9 +27,9 @@ export class BookWriteService {
         private dataSource: DataSource,
     ) {}
 
-    async createBook(userId: number, createBookDto: CreateBookDto) {
+    async createBook(userId: number, createBookDto: CreateBookDto): Promise<CreateBookResponse> {
         const genres = await this.bookLibService.findBookGenresByNames(createBookDto.genres ?? []);
-        await this.bookRepository.insert({
+        const insertResult = await this.bookRepository.insert({
             title: createBookDto.title,
             description: createBookDto.description,
             cost: createBookDto.cost,
@@ -35,6 +38,10 @@ export class BookWriteService {
             genres: genres,
             authorId: userId,
         });
+
+        return {
+            bookId: insertResult.identifiers[0].id,
+        };
     }
 
     async deleteBook(bookId: number, userId: number) {
@@ -73,18 +80,22 @@ export class BookWriteService {
         });
     }
 
-    async createPart(bookId: number, createPartDto: CreatePartDto) {
+    async createPart(bookId: number, createPartDto: CreatePartDto): Promise<CreatePartResponse> {
         const lastPart = await this.bookPartRepository.findOne({
             where: { bookId: bookId },
             order: { index: 'DESC' },
         });
         const lastPartIndex = lastPart?.index ?? 0;
 
-        await this.bookPartRepository.insert({
+        const insertResult = await this.bookPartRepository.insert({
             title: createPartDto.title,
             bookId,
             index: lastPartIndex + 1,
         });
+
+        return {
+            partId: insertResult.identifiers[0].id,
+        };
     }
 
     async updatePart(bookPartId: number, updatePartDto: UpdatePartDto) {
@@ -104,24 +115,34 @@ export class BookWriteService {
         await this.bookPartRepository.delete({ id: bookPartId });
     }
 
-    async createPage(bookPartId: number, createPageDto: CreatePageDto) {
+    async createPage(bookPartId: number, createPageDto: CreatePageDto): Promise<CreatePageResponse> {
         const lastPage = await this.bookPageRepository.findOne({
             where: { bookPartId },
             order: { index: 'DESC' },
         });
-        const lastPageIndex = lastPage?.index ?? 0;
+        const lastPageIndex = Number(lastPage?.index ?? 0);
+        let newIndex = lastPageIndex + 1;
 
-        const pages = await this.bookPageRepository.find({
-            where: {
-                bookPartId,
-                id: In([createPageDto.prevPageId, createPageDto.nextPageId]),
-            },
-        });
+        if (createPageDto.between) {
+            const pages = await this.bookPageRepository.find({
+                where: {
+                    bookPartId,
+                    id: In([createPageDto.between.prevPageId, createPageDto.between.nextPageId]),
+                },
+            });
 
-        await this.bookPageRepository.insert({
+            if (pages.length !== 2) throw new BadRequestException('Invalid prevPage / nextPage ids');
+            newIndex = (Number(pages[0].index) + Number(pages[1].index)) / 2;
+        }
+
+        const insertResult = await this.bookPageRepository.insert({
             bookPartId,
-            index: pages?.length ? (pages[0].index + pages[1].index) / 2 : lastPageIndex + 1,
+            index: newIndex,
         });
+
+        return {
+            pageId: insertResult.identifiers[0].id,
+        };
     }
 
     async updatePage(bookPageId: number, updatePageDto: UpdatePageDto) {

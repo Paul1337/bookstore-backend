@@ -14,10 +14,10 @@ export class AuthGoogleService {
         private jwtService: JwtService,
         @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(UserRole) private userRoleRepository: Repository<UserRole>,
+        @InjectRepository(UserProfile) private userProfileRepository: Repository<UserProfile>,
     ) {}
 
     async googleAuthUser(googleUser: GoogleUserScheme) {
-        console.log('google user', googleUser);
         let user = await this.userRepository.findOne({
             where: { googleId: googleUser.googleId },
             relations: ['roles'],
@@ -25,12 +25,15 @@ export class AuthGoogleService {
 
         if (!user) {
             const userRole = await this.userRoleRepository.findOne({ where: { name: Role.User } });
+            const userProfile = this.userProfileRepository.create();
             user = this.userRepository.create({
                 googleId: googleUser.googleId,
                 email: googleUser.email,
                 username: googleUser.username,
                 roles: [userRole],
+                profile: userProfile,
             });
+            await this.userProfileRepository.save(userProfile);
             await this.userRepository.save(user);
         }
 

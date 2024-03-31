@@ -14,8 +14,9 @@ export class PageAuthorGuard implements CanActivate {
 
         const bookPage = await this.bookPageRepository
             .createQueryBuilder('bookPage')
-            .leftJoinAndSelect('bookPage.part', 'bookPart')
+            .leftJoinAndSelect('bookPage.bookPart', 'bookPart')
             .leftJoinAndSelect('bookPart.book', 'book')
+            .where('bookPage.id = :bookPageId', { bookPageId })
             .getOne();
 
         if (!bookPage || bookPage.bookPart.book.authorId !== request.user.id)

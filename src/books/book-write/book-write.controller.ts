@@ -96,16 +96,6 @@ export class BookWriteController {
         return this.bookWriteService.deletePart(bookPartId);
     }
 
-    @Post(':bookPartId/pages')
-    @ApiOperation({
-        summary: 'Создание страницы',
-    })
-    @Roles(Role.User)
-    @UseGuards(PartAuthorGuard)
-    async createPage(@Param('bookPartId') bookPartId: number, createPageDto: CreatePageDto) {
-        return this.bookWriteService.createPage(bookPartId, createPageDto);
-    }
-
     @Post('pages/:bookPageId')
     @Roles(Role.User)
     @UseGuards(PageAuthorGuard)
@@ -114,6 +104,16 @@ export class BookWriteController {
     })
     async updatePage(@Param('bookPageId') bookPageId: number, @Body() updatePageDto: UpdatePageDto) {
         return this.bookWriteService.updatePage(bookPageId, updatePageDto);
+    }
+
+    @Post(':bookPartId/pages')
+    @ApiOperation({
+        summary: 'Создание страницы',
+    })
+    @Roles(Role.User)
+    @UseGuards(PartAuthorGuard)
+    async createPage(@Param('bookPartId') bookPartId: number, @Body() createPageDto: CreatePageDto) {
+        return this.bookWriteService.createPage(bookPartId, createPageDto);
     }
 
     @Delete('pages/:bookPageId')

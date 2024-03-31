@@ -1,9 +1,19 @@
-import { IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsNotEmptyObject, IsNumber, IsOptional, ValidateNested } from 'class-validator';
+
+class PagesBetweenDto {
+    @IsNotEmpty({ message: 'next page id should not be empty' })
+    @IsNumber(undefined, { message: 'next page id is not a number' })
+    nextPageId: number;
+
+    @IsNotEmpty({ message: 'prev page id should not be empty' })
+    @IsNumber(undefined, { message: 'prev page id is not a number' })
+    prevPageId: number;
+}
 
 export class CreatePageDto {
     @IsOptional()
-    nextPageId?: number;
-
-    @IsOptional()
-    prevPageId?: number;
+    @ValidateNested()
+    @Type(() => PagesBetweenDto)
+    between?: PagesBetweenDto;
 }
