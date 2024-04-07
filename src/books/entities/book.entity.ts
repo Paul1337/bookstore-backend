@@ -38,7 +38,7 @@ export class Book {
 
     @ManyToMany(type => BookGenre, {
         eager: true,
-        // cascade: ['insert', 'update'],
+        cascade: ['insert', 'update'],
     })
     @JoinTable({ name: 'book_genres' })
     genres: BookGenre[];
@@ -58,7 +58,7 @@ export class Book {
     @Column({ type: 'varchar', length: 2048, nullable: true })
     coverSrc: string;
 
-    @Column({ type: 'int4', nullable: true })
+    @Column({ type: 'int4', default: 0 })
     cost: number;
 
     @Column({ type: 'int4', nullable: true })

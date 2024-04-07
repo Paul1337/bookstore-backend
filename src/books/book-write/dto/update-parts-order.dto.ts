@@ -1,8 +1,6 @@
-interface PartOrderUpdate {
-    id: number;
-    index: number;
-}
+import { IsNotEmpty } from 'class-validator';
 
 export class UpdatePartsOrderDto {
-    parts: PartOrderUpdate[];
+    @IsNotEmpty()
+    partsIds: number[];
 }

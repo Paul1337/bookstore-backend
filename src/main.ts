@@ -30,5 +30,10 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
 
     await app.listen(process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : DEFAULT_PORT);
+
+    process.on('SIGTERM', () => {
+        console.log('closing app');
+        app.close();
+    });
 }
 bootstrap();

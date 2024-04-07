@@ -27,5 +27,9 @@ export class GetPublicBookInfoResponse {
     parts: {
         id: number;
         title: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isFree: boolean;
     }[];
+    genres: string[];
 }

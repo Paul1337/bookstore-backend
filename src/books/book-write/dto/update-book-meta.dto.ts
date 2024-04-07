@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, Length } from 'class-validator';
 import { CreateBookDto } from './create-book.dto';
 

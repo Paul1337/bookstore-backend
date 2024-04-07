@@ -23,7 +23,7 @@ const options: DataSourceOptions & SeederOptions = {
     password: DB_PASSWORD,
 
     // entities: [BookPage, BookPart, Book, BookSeries, BookGenre, User, UserRole, UserProfile],
-    // entities: ['src/**/*.entity.ts'],
+    entities: ['src/**/*.entity.ts'],
     seeds: ['src/db/seeders/*.ts'],
     factories: ['src/db/factories/*.ts'],
 

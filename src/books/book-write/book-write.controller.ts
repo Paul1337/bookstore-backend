@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Injectable, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Injectable,
+    Param,
+    Post,
+    Req,
+    UploadedFile,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
@@ -15,6 +27,8 @@ import { CreatePageDto } from './dto/create-page.dto';
 import { PageAuthorGuard } from './guards/page-author.guard';
 import { UpdatePageDto } from './dto/update-page-dto';
 import { UpdatePartsOrderGuard } from './guards/update-parts-order.guard';
+import { FileInterceptor, FilesInterceptor, NoFilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('books/write')
 @ApiTags('book-write')
@@ -28,8 +42,21 @@ export class BookWriteController {
             'Создание книги от имени текущего пользователя. Этот пользователь становится автором книги. Необходима аутентификация',
     })
     @Roles(Role.User)
-    async createBook(@Req() req: RequestExtended, @Body() createBookDto: CreateBookDto) {
-        return this.bookWriteService.createBook(req.user.id, createBookDto);
+    @UseInterceptors(
+        FileInterceptor('bookCover', {
+            dest: './static/uploads',
+            limits: { fileSize: 100 * 1024 * 1024 },
+        }),
+    )
+    async createBook(
+        @Req() req: RequestExtended,
+        @Body() createBookDto: CreateBookDto,
+        @UploadedFile() bookCover?: Express.Multer.File,
+    ) {
+        return this.bookWriteService.createBook(req.user.id, {
+            ...createBookDto,
+            bookCover: bookCover && bookCover.path.substring(bookCover.path.indexOf('/uploads')),
+        });
     }
 
     @Post(':bookId/edit')
@@ -40,8 +67,21 @@ export class BookWriteController {
     })
     @Roles(Role.User)
     @UseGuards(BookAuthorGuard)
-    async updateBookMeta(@Body() updateBookMeta: UpdateBookMetaDto, @Param('bookId') bookId: number) {
-        return this.bookWriteService.updateBookMeta(bookId, updateBookMeta);
+    @UseInterceptors(
+        FileInterceptor('bookCover', {
+            dest: './static/uploads',
+            limits: { fileSize: 100 * 1024 * 1024 },
+        }),
+    )
+    async updateBookMeta(
+        @Body() updateBookMetaDto: UpdateBookMetaDto,
+        @Param('bookId') bookId: number,
+        @UploadedFile() bookCover?: Express.Multer.File,
+    ) {
+        return this.bookWriteService.updateBookMeta(bookId, {
+            ...updateBookMetaDto,
+            bookCover: bookCover && bookCover.path.substring(bookCover.path.indexOf('/uploads')),
+        });
     }
 
     @Delete(':bookId')
@@ -54,6 +94,16 @@ export class BookWriteController {
     @UseGuards(BookAuthorGuard)
     async deleteBook(@Req() req: RequestExtended, @Param('bookId') bookId: number) {
         return this.bookWriteService.deleteBook(bookId, req.user.id);
+    }
+
+    @Post(':bookId/parts/order')
+    @Roles(Role.User)
+    @UseGuards(BookAuthorGuard, UpdatePartsOrderGuard)
+    @ApiOperation({
+        summary: 'Обновление порядка глав',
+    })
+    async updatePartsOrder(@Body() updatePartsOrderDto: UpdatePartsOrderDto) {
+        return this.bookWriteService.updatePartsOrder(updatePartsOrderDto);
     }
 
     @Post(':bookId/parts')
@@ -74,16 +124,6 @@ export class BookWriteController {
     })
     async updatePart(@Param('bookPartId') bookPartId: number, @Body() updatePartDto: UpdatePartDto) {
         return this.bookWriteService.updatePart(bookPartId, updatePartDto);
-    }
-
-    @Post('parts/order')
-    @Roles(Role.User)
-    @UseGuards(UpdatePartsOrderGuard)
-    @ApiOperation({
-        summary: 'Обновление порядка глав',
-    })
-    async updatePartsOrder(updatePartsOrderDto: UpdatePartsOrderDto) {
-        return this.bookWriteService.updatePartsOrder(updatePartsOrderDto);
     }
 
     @Delete('parts/:bookPartId')

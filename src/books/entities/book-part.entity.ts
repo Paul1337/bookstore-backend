@@ -1,5 +1,6 @@
 import {
     Column,
+    CreateDateColumn,
     Entity,
     JoinColumn,
     ManyToOne,
@@ -32,4 +33,10 @@ export class BookPart {
 
     @Column({ type: 'int4' })
     bookId: number;
+
+    @CreateDateColumn({ type: 'timestamp', nullable: true })
+    createdAt: Date;
+
+    @Column({ type: 'timestamp', nullable: true })
+    updatedAt: Date;
 }

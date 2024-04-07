@@ -92,7 +92,7 @@ export class BookReadService {
 
         const bookPart = await this.bookPartRepository.findOne({ where: { id: bookPartId, bookId } });
         if (!bookPart) throw new BadRequestException('That part does not exist for this book');
-        const prevParts = await this.bookPageRepository
+        const prevPages = await this.bookPageRepository
             .createQueryBuilder('bookPage')
             .select('COUNT(*)', 'count')
             .leftJoin('bookPage.bookPart', 'bookPart')
@@ -105,8 +105,8 @@ export class BookReadService {
             select: ['id'],
         });
 
-        const firstPageIndex = Number(prevParts.count) + 1;
-        const lastPageIndex = Number(prevParts.count) + currentPartPages.length;
+        const firstPageIndex = Number(prevPages.count) + 1;
+        const lastPageIndex = Number(prevPages.count) + currentPartPages.length;
 
         let pages = [];
         if (pagesCount > 0) {

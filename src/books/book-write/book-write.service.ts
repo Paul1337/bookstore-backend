@@ -16,6 +16,7 @@ import { UpdatePageDto } from './dto/update-page-dto';
 import { CreateBookResponse } from './responses/create-book.response';
 import { CreatePartResponse } from './responses/create-part.response';
 import { CreatePageResponse } from './responses/create-page.response';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BookWriteService {
@@ -25,22 +26,27 @@ export class BookWriteService {
         @InjectRepository(BookPart) private bookPartRepository: Repository<BookPart>,
         private bookLibService: BooksLibService,
         private dataSource: DataSource,
+        private configService: ConfigService,
     ) {}
 
     async createBook(userId: number, createBookDto: CreateBookDto): Promise<CreateBookResponse> {
         const genres = await this.bookLibService.findBookGenresByNames(createBookDto.genres ?? []);
-        const insertResult = await this.bookRepository.insert({
+        const newBook = this.bookRepository.create({
             title: createBookDto.title,
             description: createBookDto.description,
-            cost: createBookDto.cost,
+            cost: createBookDto.cost ?? 0,
             freeChaptersCount: createBookDto.freeChaptersCount,
             ageRestriction: createBookDto.ageRestriction,
             genres: genres,
             authorId: userId,
+            coverSrc:
+                createBookDto.bookCover &&
+                this.configService.get('STATIC_BASE_URL') + createBookDto.bookCover,
         });
+        await this.bookRepository.save(newBook);
 
         return {
-            bookId: insertResult.identifiers[0].id,
+            bookId: newBook.id,
         };
     }
 
@@ -58,6 +64,9 @@ export class BookWriteService {
                     cost: updateBookMetaDto.cost,
                     freeChaptersCount: updateBookMetaDto.freeChaptersCount,
                     ageRestriction: updateBookMetaDto.ageRestriction,
+                    coverSrc:
+                        updateBookMetaDto.bookCover &&
+                        this.configService.get('STATIC_BASE_URL') + updateBookMetaDto.bookCover,
                 },
             );
 
@@ -104,9 +113,16 @@ export class BookWriteService {
 
     async updatePartsOrder(updatePartsOrder: UpdatePartsOrderDto) {
         await this.dataSource.transaction(async () => {
-            const updatePromises = updatePartsOrder.parts.map(updateItem =>
-                this.bookPartRepository.update({ id: updateItem.id }, { index: updateItem.index }),
-            );
+            const resetPromises = updatePartsOrder.partsIds.map((partId, index) => {
+                return this.bookPartRepository.update({ id: partId }, { index: -1 - index });
+            });
+            await Promise.all(resetPromises);
+            const updatePromises = updatePartsOrder.partsIds.map((partId, index) => {
+                return this.bookPartRepository.update(
+                    { id: partId },
+                    { index: index + updatePartsOrder.partsIds.length + 1 },
+                );
+            });
             await Promise.all(updatePromises);
         });
     }

@@ -25,17 +25,13 @@ export class UserProfileController {
         summary: 'Загрузить фотографию профиля пользователя',
     })
     @UseInterceptors(
-        FileInterceptor('file', {
-            dest: '../static/uploads',
-            limits: {
-                fileSize: 100 * 1024 * 1024,
-            },
+        FileInterceptor('image', {
+            dest: './static/uploads',
+            limits: { fileSize: 100 * 1024 * 1024 },
         }),
     )
     async uploadUserImage(@Req() req: RequestExtended, @UploadedFile() userImg: Express.Multer.File) {
-        console.log('uploaded user image', userImg);
-        const correctedPath = userImg.path.substring(userImg.path.indexOf('/'));
-        console.log('corrected image path', correctedPath);
+        const correctedPath = userImg.path.substring(userImg.path.indexOf('/uploads'));
         await this.userProfileService.updateUserImg(req.user.id, correctedPath);
         return { userImg: correctedPath };
     }
@@ -45,20 +41,16 @@ export class UserProfileController {
         summary: 'Загрузить фотографию фона профиля',
     })
     @UseInterceptors(
-        FileInterceptor('file', {
-            dest: '../static/uploads',
-            limits: {
-                fileSize: 100 * 1024 * 1024,
-            },
+        FileInterceptor('image', {
+            dest: './static/uploads',
+            limits: { fileSize: 100 * 1024 * 1024 },
         }),
     )
     async uploadBackgroundImage(
         @Req() req: RequestExtended,
         @UploadedFile() backgroundImg: Express.Multer.File,
     ) {
-        console.log('uploaded user image', backgroundImg);
-        const correctedPath = backgroundImg.path.substring(backgroundImg.path.indexOf('/'));
-        console.log('corrected image path', correctedPath);
+        const correctedPath = backgroundImg.path.substring(backgroundImg.path.indexOf('/uploads'));
         await this.userProfileService.updateBackgroundImg(req.user.id, correctedPath);
         return { userImg: correctedPath };
     }

@@ -1,16 +1,16 @@
-import { IsNotEmpty, IsNumber, IsOptional, Length } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateBookDto {
     @Length(5, undefined, {
         message: 'Название книги не должно быть короче 5 символов',
     })
-    @IsOptional()
+    // @IsOptional()
     title: string;
 
     @IsNotEmpty({
         message: 'Описание не может быть пустым',
     })
-    @IsOptional()
+    // @IsOptional()
     description: string;
 
     @IsNumber()
@@ -27,4 +27,7 @@ export class CreateBookDto {
 
     @IsOptional()
     genres: string[];
+
+    @IsOptional()
+    bookCover?: string;
 }

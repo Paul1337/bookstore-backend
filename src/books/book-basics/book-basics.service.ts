@@ -27,8 +27,12 @@ export class BookBasicsService {
             relations: ['author', 'series', 'parts'],
         });
 
+        if (!bookWithRelations) {
+            throw new BadRequestException('Book not found');
+        }
         const bookInfo = await this.bookRepository
             .createQueryBuilder('book')
+            .leftJoinAndSelect('book.genres', 'genres')
             .leftJoin(UserBooks, 'bookInfo', 'book.id = bookInfo.book_id')
             .leftJoin(User, 'user', 'user.id = bookInfo.user_id')
             .select('SUM(CAST(bookInfo.isStarred as INT))', 'starsCount')
@@ -63,10 +67,16 @@ export class BookBasicsService {
             starsCount: Number(bookInfo.starsCount),
             viewsCount: Number(bookInfo.viewsCount),
             paidCount: Number(bookInfo.paidCount),
-            parts: bookWithRelations.parts.map(part => ({
-                id: part.id,
-                title: part.title,
-            })),
+            parts: bookWithRelations.parts
+                .sort((p1, p2) => p1.index - p2.index)
+                .map((part, index) => ({
+                    id: part.id,
+                    title: part.title,
+                    createdAt: part.createdAt,
+                    updatedAt: part.updatedAt,
+                    isFree: index + 1 <= bookWithRelations.freeChaptersCount,
+                })),
+            genres: bookWithRelations.genres?.map(g => g.name) ?? [],
         };
     }
 

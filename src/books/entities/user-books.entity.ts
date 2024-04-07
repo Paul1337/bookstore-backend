@@ -42,7 +42,7 @@ export class UserBooks {
     @Column({ type: 'int4', default: 1 })
     currentPage: number;
 
-    @ManyToOne(type => BookPart, { nullable: true })
+    @ManyToOne(type => BookPart, { nullable: true, onDelete: 'SET NULL' })
     @JoinColumn({ name: 'current_part_id' })
     currentPart: BookPart;
 
