@@ -12,7 +12,7 @@ import { CreatePageDto } from './dto/create-page.dto';
 import { CreatePartDto } from './dto/create-part.dto';
 import { UpdatePartDto } from './dto/update-part.dto';
 import { UpdatePartsOrderDto } from './dto/update-parts-order.dto';
-import { UpdatePageDto } from './dto/update-page-dto';
+import { UpdatePageDto } from './dto/update-page.dto';
 import { CreateBookResponse } from './responses/create-book.response';
 import { CreatePartResponse } from './responses/create-part.response';
 import { CreatePageResponse } from './responses/create-page.response';

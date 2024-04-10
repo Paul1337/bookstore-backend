@@ -25,7 +25,7 @@ import { UpdatePartDto } from './dto/update-part.dto';
 import { UpdatePartsOrderDto } from './dto/update-parts-order.dto';
 import { CreatePageDto } from './dto/create-page.dto';
 import { PageAuthorGuard } from './guards/page-author.guard';
-import { UpdatePageDto } from './dto/update-page-dto';
+import { UpdatePageDto } from './dto/update-page.dto';
 import { UpdatePartsOrderGuard } from './guards/update-parts-order.guard';
 import { FileInterceptor, FilesInterceptor, NoFilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -137,11 +137,11 @@ export class BookWriteController {
     }
 
     @Post('pages/:bookPageId')
-    @Roles(Role.User)
-    @UseGuards(PageAuthorGuard)
     @ApiOperation({
         summary: 'Обновление страницы',
     })
+    @Roles(Role.User)
+    @UseGuards(PageAuthorGuard)
     async updatePage(@Param('bookPageId') bookPageId: number, @Body() updatePageDto: UpdatePageDto) {
         return this.bookWriteService.updatePage(bookPageId, updatePageDto);
     }
