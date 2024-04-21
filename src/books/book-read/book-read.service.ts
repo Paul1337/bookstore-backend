@@ -10,6 +10,8 @@ import { GetPartDto } from './dto/get-part.dto';
 import { GetPagesResponse } from './responses/get-pages.response';
 import { GetPartResponse } from './responses/get-part.response';
 import { Book } from '../entities/book.entity';
+import { BookPageRequest } from '../entities/book-page-request';
+import { BookStatService } from '../book-stat/book-stat.service';
 
 @Injectable()
 export class BookReadService {
@@ -18,6 +20,7 @@ export class BookReadService {
         @InjectRepository(BookPart) private bookPartRepository: Repository<BookPart>,
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         private bookLibService: BooksLibService,
+        private bookStatService: BookStatService,
     ) {}
 
     async getPages(
@@ -58,6 +61,7 @@ export class BookReadService {
                 '(bookInfo.isPaid OR book.cost = 0 OR book.authorId = :userId OR bookPart.id IN (:...freeBookPartIds))',
                 { freeBookPartIds, userId },
             )
+            .andWhere('(book.isPublished OR book.authorId = :authorId)', { authorId: userId })
             .offset(pageFrom - 1)
             .limit(pageTo - pageFrom + 1)
             .addOrderBy('bookPart.index', 'ASC')
@@ -67,19 +71,27 @@ export class BookReadService {
         const selectedCurrentPage = pages.find((page, index) => pageFrom + index === currentPage);
         if (!selectedCurrentPage) throw new ForbiddenException('Current page can not be selected');
 
-        if (userId) {
-            await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, {
-                currentPage,
-                currentPart: selectedCurrentPage.bookPart,
-                // currentPartId: selectedCurrentPage.bookPartId,
-            });
-        }
-
-        return pages.map((page, index) => ({
+        const resultPages = pages.map((page, index) => ({
             id: page.id,
             content: page.content,
             index: index + pageFrom,
         }));
+
+        if (userId) {
+            await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, {
+                currentPage,
+                currentPart: selectedCurrentPage.bookPart,
+            });
+
+            // lets just do it in background
+            this.bookStatService.updateRequestedPages(
+                userId,
+                bookId,
+                resultPages.map(page => page.index),
+            );
+        }
+
+        return resultPages;
     }
 
     async getPart(

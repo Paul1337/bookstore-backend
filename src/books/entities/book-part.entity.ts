@@ -2,6 +2,7 @@ import {
     Column,
     CreateDateColumn,
     Entity,
+    Index,
     JoinColumn,
     ManyToOne,
     OneToMany,
@@ -22,6 +23,7 @@ export class BookPart {
     title: string;
 
     @Column({ type: 'numeric' })
+    @Index()
     index: number;
 
     @ManyToOne(type => Book, book => book.parts, { onDelete: 'CASCADE' })

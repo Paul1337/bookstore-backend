@@ -1,12 +1,4 @@
 import 'dotenv/config';
-import { BookGenre } from 'src/books/entities/book-genre';
-import { BookPage } from 'src/books/entities/book-page.entity';
-import { BookPart } from 'src/books/entities/book-part.entity';
-import { BookSeries } from 'src/books/entities/book-series.entity';
-import { Book } from 'src/books/entities/book.entity';
-import { UserProfile } from 'src/users/entities/user-profile.entity';
-import { UserRole } from 'src/users/entities/user-role.entity';
-import { User } from 'src/users/entities/user.entity';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions, runSeeders } from 'typeorm-extension';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { BookPart } from './book-part.entity';
 import { Book } from './book.entity';
 
@@ -12,6 +12,7 @@ export class BookPage {
     content: string;
 
     @Column({ type: 'numeric' })
+    @Index()
     index: number;
 
     @ManyToOne(type => BookPart, part => part.pages, { onDelete: 'CASCADE' })
@@ -20,11 +21,4 @@ export class BookPage {
 
     @Column({ type: 'int4' })
     bookPartId: number;
-
-    // @ManyToOne(type => Book, { onDelete: 'CASCADE' })
-    // @JoinColumn({ name: 'book_id' })
-    // book: Book;
-
-    // @Column({ type: 'int4' })
-    // bookId: number;
 }

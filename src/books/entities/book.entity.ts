@@ -3,16 +3,19 @@ import {
     Column,
     CreateDateColumn,
     Entity,
+    JoinColumn,
     JoinTable,
     ManyToMany,
     ManyToOne,
     OneToMany,
+    OneToOne,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BookStatus } from '../enums/book-status.enum';
-import { BookGenre } from './book-genre';
+import { BookGenre } from './book-genre.entity';
 import { BookPart } from './book-part.entity';
 import { BookSeries } from './book-series.entity';
+import { BookStat } from './book-stat.entity';
 
 @Entity()
 export class Book {
@@ -37,7 +40,7 @@ export class Book {
     authorId: number;
 
     @ManyToMany(type => BookGenre, {
-        eager: true,
+        // eager: true,
         cascade: ['insert', 'update'],
     })
     @JoinTable({ name: 'book_genres' })
@@ -49,8 +52,11 @@ export class Book {
     @Column({ type: 'timestamp', nullable: true })
     updatedAt: Date;
 
-    @Column({ type: 'int4', default: 0 })
-    addsToLibraryCount: number;
+    @Column({ type: 'timestamp', nullable: true })
+    publishedAt: Date;
+
+    // @Column({ type: 'int4', default: 0 })
+    // addsToLibraryCount: number;
 
     @Column({ type: 'varchar', length: 2048, nullable: true })
     backgroundSrc: string;
@@ -91,4 +97,11 @@ export class Book {
 
     @OneToMany(type => BookPart, part => part.book, { cascade: ['remove'] })
     bookParts: BookPart[];
+
+    @OneToOne(type => BookStat, {
+        cascade: ['update', 'insert', 'remove'],
+        nullable: true,
+    })
+    @JoinColumn()
+    bookStat?: BookStat;
 }

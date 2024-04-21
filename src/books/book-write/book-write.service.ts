@@ -3,7 +3,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '../entities/book.entity';
 import { DataSource, In, MoreThan, Repository } from 'typeorm';
-import { BookGenre } from '../entities/book-genre';
+import { BookGenre } from '../entities/book-genre.entity';
 import { BookPart } from '../entities/book-part.entity';
 import { BookPage } from '../entities/book-page.entity';
 import { UpdateBookMetaDto } from './dto/update-book-meta.dto';
@@ -17,6 +17,7 @@ import { CreateBookResponse } from './responses/create-book.response';
 import { CreatePartResponse } from './responses/create-part.response';
 import { CreatePageResponse } from './responses/create-page.response';
 import { ConfigService } from '@nestjs/config';
+import { BookStatService } from '../book-stat/book-stat.service';
 
 @Injectable()
 export class BookWriteService {
@@ -25,6 +26,7 @@ export class BookWriteService {
         @InjectRepository(BookPage) private bookPageRepository: Repository<BookPage>,
         @InjectRepository(BookPart) private bookPartRepository: Repository<BookPart>,
         private bookLibService: BooksLibService,
+        private bookStatService: BookStatService,
         private dataSource: DataSource,
         private configService: ConfigService,
     ) {}
@@ -42,6 +44,14 @@ export class BookWriteService {
             coverSrc:
                 createBookDto.bookCover &&
                 this.configService.get('STATIC_BASE_URL') + createBookDto.bookCover,
+            bookStat: {
+                addsToLibraryCount: 0,
+                paidCount: 0,
+                readCount: 0,
+                readTime: 0,
+                starsCount: 0,
+                viewsCount: 0,
+            },
         });
         await this.bookRepository.save(newBook);
 
@@ -132,41 +142,47 @@ export class BookWriteService {
     }
 
     async createPage(bookPartId: number, createPageDto: CreatePageDto): Promise<CreatePageResponse> {
-        let newIndex = null;
+        let insertResult;
+        this.dataSource.transaction(async entityManager => {
+            let newIndex = null;
 
-        if (createPageDto.prevPageId) {
-            const prevPage = await this.bookPageRepository.findOne({
-                where: { bookPartId, id: createPageDto.prevPageId },
-            });
-            if (!prevPage) throw new BadRequestException('Invalid prev page id');
+            if (createPageDto.prevPageId) {
+                const prevPage = await this.bookPageRepository.findOne({
+                    where: { bookPartId, id: createPageDto.prevPageId },
+                });
+                if (!prevPage) throw new BadRequestException('Invalid prev page id');
 
-            const nextPage = await this.bookPageRepository.findOne({
-                where: {
-                    bookPartId,
-                    index: MoreThan(prevPage.index),
-                },
-                order: { index: 'ASC' },
-            });
+                const nextPage = await this.bookPageRepository.findOne({
+                    where: {
+                        bookPartId,
+                        index: MoreThan(prevPage.index),
+                    },
+                    order: { index: 'ASC' },
+                });
 
-            if (!nextPage) {
-                newIndex = Number(prevPage.index) + 1;
+                if (!nextPage) {
+                    newIndex = Number(prevPage.index) + 1;
+                } else {
+                    newIndex = (Number(prevPage.index) + Number(nextPage.index)) / 2;
+                }
             } else {
-                newIndex = (Number(prevPage.index) + Number(nextPage.index)) / 2;
+                const lastPage = await this.bookPageRepository.findOne({
+                    where: { bookPartId },
+                    order: { index: 'DESC' },
+                });
+                const lastPageIndex = Number(lastPage?.index ?? 0);
+                newIndex = lastPageIndex + 1;
             }
-        } else {
-            const lastPage = await this.bookPageRepository.findOne({
-                where: { bookPartId },
-                order: { index: 'DESC' },
+
+            if (!newIndex) throw new BadRequestException('Invalid data');
+
+            insertResult = await this.bookPageRepository.insert({
+                bookPartId,
+                index: newIndex,
             });
-            const lastPageIndex = Number(lastPage?.index ?? 0);
-            newIndex = lastPageIndex + 1;
-        }
 
-        if (!newIndex) throw new BadRequestException('Invalid data');
-
-        const insertResult = await this.bookPageRepository.insert({
-            bookPartId,
-            index: newIndex,
+            const bookPart = await this.bookPartRepository.findOne({ where: { id: bookPartId } });
+            await this.bookStatService.updateStat(bookPart.bookId, { pagesCount: 1 });
         });
 
         return { pageId: insertResult.identifiers[0].id };
@@ -177,6 +193,21 @@ export class BookWriteService {
     }
 
     async deletePage(bookPageId: number) {
-        await this.bookPageRepository.delete({ id: bookPageId });
+        this.dataSource.transaction(async entityManager => {
+            const page = await this.bookPageRepository.findOne({
+                where: { id: bookPageId },
+                relations: ['bookPart'],
+            });
+            await this.bookPageRepository.delete({ id: bookPageId });
+            await this.bookStatService.updateStat(page.bookPart.bookId, { pagesCount: -1 });
+        });
+    }
+
+    async publishBook(bookId: number) {
+        await this.bookRepository.update({ id: bookId }, { isPublished: true, publishedAt: new Date() });
+    }
+
+    async unpublishBook(bookId: number) {
+        await this.bookRepository.update({ id: bookId }, { isPublished: false });
     }
 }

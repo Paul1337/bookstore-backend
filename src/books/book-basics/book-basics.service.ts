@@ -8,8 +8,9 @@ import { GetPublicBookInfoResponse } from './responses/get-public-book-info.resp
 import { GetPrivateBookInfoResponse } from './responses/get-private-book-info.response';
 import { User } from 'src/users/entities/user.entity';
 import { GetMyLibraryResponse } from './responses/get-my-library.response';
-import { BookGenre } from '../entities/book-genre';
+import { BookGenre } from '../entities/book-genre.entity';
 import { BookSeries } from '../entities/book-series.entity';
+import { BookStatService } from '../book-stat/book-stat.service';
 
 @Injectable()
 export class BookBasicsService {
@@ -18,28 +19,19 @@ export class BookBasicsService {
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
         @InjectRepository(BookGenre) private bookGenreRepository: Repository<BookGenre>,
         @InjectRepository(BookSeries) private bookSeriesRepository: Repository<BookSeries>,
+        private bookStatService: BookStatService,
         private bookLibService: BooksLibService,
     ) {}
 
     async getBookPublicInfo(bookId: number): Promise<GetPublicBookInfoResponse> {
         const bookWithRelations = await this.bookRepository.findOne({
             where: { id: bookId },
-            relations: ['author', 'series', 'parts'],
+            relations: ['author', 'series', 'parts', 'bookStat'],
         });
 
         if (!bookWithRelations) {
             throw new BadRequestException('Book not found');
         }
-        const bookInfo = await this.bookRepository
-            .createQueryBuilder('book')
-            .leftJoinAndSelect('book.genres', 'genres')
-            .leftJoin(UserBooks, 'bookInfo', 'book.id = bookInfo.book_id')
-            .leftJoin(User, 'user', 'user.id = bookInfo.user_id')
-            .select('SUM(CAST(bookInfo.isStarred as INT))', 'starsCount')
-            .addSelect('SUM(CAST(bookInfo.isViewed as INT))', 'viewsCount')
-            .addSelect('SUM(CAST(bookInfo.isPaid as INT))', 'paidCount')
-            .where('book.id = :bookId', { bookId })
-            .getRawOne();
 
         return {
             id: bookWithRelations.id,
@@ -54,7 +46,6 @@ export class BookBasicsService {
             },
             createdAt: bookWithRelations.createdAt,
             updatedAt: bookWithRelations.updatedAt,
-            addsToLibraryCount: bookWithRelations.addsToLibraryCount,
             backgroundSrc: bookWithRelations.backgroundSrc,
             coverSrc: bookWithRelations.coverSrc,
             cost: bookWithRelations.cost,
@@ -64,9 +55,10 @@ export class BookBasicsService {
             isBanned: bookWithRelations.isBanned,
             ageRestriction: bookWithRelations.ageRestriction,
             series: bookWithRelations.series,
-            starsCount: Number(bookInfo.starsCount),
-            viewsCount: Number(bookInfo.viewsCount),
-            paidCount: Number(bookInfo.paidCount),
+            addsToLibraryCount: bookWithRelations.bookStat?.addsToLibraryCount ?? 0,
+            starsCount: bookWithRelations.bookStat?.starsCount ?? 0,
+            viewsCount: bookWithRelations.bookStat?.viewsCount ?? 0,
+            paidCount: bookWithRelations.bookStat?.paidCount ?? 0,
             parts: bookWithRelations.parts
                 .sort((p1, p2) => p1.index - p2.index)
                 .map((part, index) => ({
@@ -86,7 +78,8 @@ export class BookBasicsService {
 
         if (!bookInfo.isViewed) {
             bookInfo.isViewed = true;
-            await this.userBooksRepository.update({ id: bookInfo.id }, { isViewed: true });
+            await this.userBooksRepository.save(bookInfo);
+            await this.bookStatService.updateStat(bookId, { viewsCount: 1 });
         }
 
         return {
@@ -112,25 +105,24 @@ export class BookBasicsService {
     }
 
     async starBook(bookId: number, userId: number) {
+        const userBookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+        if (userBookInfo.isStarred) return;
         await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, { isStarred: true });
+        await this.bookStatService.updateStat(bookId, { starsCount: 1 });
     }
 
     async unstarBook(bookId: number, userId: number) {
+        const userBookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
+        if (!userBookInfo.isStarred) return;
         await this.bookLibService.createOrUpdateUserbookInfo(bookId, userId, { isStarred: false });
+        await this.bookStatService.updateStat(bookId, { starsCount: -1 });
     }
 
     async addBookToLibrary(bookId: number, userId: number) {
         const bookInfo = await this.bookLibService.getUserBookInfo(bookId, userId);
 
         if (!bookInfo.wasInLibrary) {
-            await this.bookRepository
-                .createQueryBuilder()
-                .update(Book)
-                .set({
-                    addsToLibraryCount: () => 'addsToLibraryCount + 1',
-                })
-                .where('id = :bookId', { bookId })
-                .execute();
+            await this.bookStatService.updateStat(bookId, { addsToLibraryCount: 1 });
         }
 
         bookInfo.isInLibrary = true;

@@ -1,5 +1,6 @@
 import { BookPage } from 'src/books/entities/book-page.entity';
 import { BookPart } from 'src/books/entities/book-part.entity';
+import { BookStat } from 'src/books/entities/book-stat.entity';
 import { Book } from 'src/books/entities/book.entity';
 import { User } from 'src/users/entities/user.entity';
 import { DataSource } from 'typeorm';
@@ -29,6 +30,7 @@ export default class BookSeeder implements Seeder {
         const bookFactory = factoryManager.get(Book);
         const bookPartFactory = factoryManager.get(BookPart);
         const bookPageFactory = factoryManager.get(BookPage);
+        const bookStatFactoty = factoryManager.get(BookStat);
 
         await dataSource.transaction(async entityManager => {
             for (let i = 0; i < this.BooksCount; i++) {
@@ -39,8 +41,11 @@ export default class BookSeeder implements Seeder {
                     .limit(1)
                     .getOne();
 
+                const bookStat = await bookStatFactoty.make();
+
                 let book = await bookFactory.make();
                 book.authorId = author.id;
+                book.bookStat = bookStat;
 
                 book = await bookFactory.save(book);
 

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { DeepPartial, In, Repository } from 'typeorm';
-import { Book } from '../entities/book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserBooks } from '../entities/user-books.entity';
-import { BookGenre } from '../entities/book-genre';
+import { DeepPartial, In, Repository } from 'typeorm';
+import { BookGenre } from '../entities/book-genre.entity';
 import { BookPart } from '../entities/book-part.entity';
+import { Book } from '../entities/book.entity';
+import { UserBooks } from '../entities/user-books.entity';
 
 @Injectable()
 export class BooksLibService {
@@ -17,10 +17,7 @@ export class BooksLibService {
 
     async getUserBookInfo(bookId: number, userId: number) {
         let bookInfo = await this.userBooksRepository.findOne({
-            where: {
-                bookId: bookId,
-                userId: userId,
-            },
+            where: { bookId: bookId, userId: userId },
             relations: ['currentPart'],
         });
 

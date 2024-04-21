@@ -54,4 +54,10 @@ export class UserBooks {
 
     @Column()
     isViewed: boolean;
+
+    @Column('double precision', { default: 0 })
+    readingPart: number;
+
+    @Column('bool', { default: false })
+    supposedToBeRead: boolean;
 }

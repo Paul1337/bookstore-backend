@@ -29,6 +29,7 @@ import { UpdatePageDto } from './dto/update-page.dto';
 import { UpdatePartsOrderGuard } from './guards/update-parts-order.guard';
 import { FileInterceptor, FilesInterceptor, NoFilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { CanPublishBookGuard } from './guards/can-publish-book.guard';
 
 @Controller('books/write')
 @ApiTags('book-write')
@@ -164,5 +165,19 @@ export class BookWriteController {
     })
     async deletePage(@Param('bookPageId') bookPageId: number) {
         return this.bookWriteService.deletePage(bookPageId);
+    }
+
+    @Post(':bookId/publish')
+    @Roles(Role.User)
+    @UseGuards(CanPublishBookGuard)
+    async publishBook(@Param('bookId') bookId: number) {
+        return this.bookWriteService.publishBook(bookId);
+    }
+
+    @Post(':bookId/unpublish')
+    @Roles(Role.User)
+    @UseGuards(CanPublishBookGuard)
+    async unpublishBook(@Param('bookId') bookId: number) {
+        return this.bookWriteService.unpublishBook(bookId);
     }
 }

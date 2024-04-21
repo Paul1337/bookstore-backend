@@ -1,3 +1,4 @@
+import { BookStat } from 'src/books/entities/book-stat.entity';
 import { Book } from 'src/books/entities/book.entity';
 import { BookStatus } from 'src/books/enums/book-status.enum';
 import { setSeederFactory } from 'typeorm-extension';
@@ -11,7 +12,6 @@ export default setSeederFactory(Book, faker => {
     book.rewardsCount = faker.number.int({ min: 0, max: 10 });
     book.createdAt = faker.date.past();
     book.updatedAt = faker.date.between({ from: book.createdAt, to: new Date() });
-    book.addsToLibraryCount = faker.number.int({ min: 0, max: 20 });
 
     if (Math.random() < 0.7) {
         book.cost = 0;
@@ -25,5 +25,6 @@ export default setSeederFactory(Book, faker => {
     book.isBanned = Math.random() < 0.2;
 
     book.ageRestriction = AgeRestrictions[Math.floor(Math.random() * AgeRestrictions.length)];
+
     return book;
 });

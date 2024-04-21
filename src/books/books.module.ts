@@ -12,19 +12,35 @@ import { BookPage } from './entities/book-page.entity';
 import { BookPart } from './entities/book-part.entity';
 import { BookReadController } from './book-read/book-read.controller';
 import { BookWriteController } from './book-write/book-write.controller';
-import { BookGenre } from './entities/book-genre';
+import { BookGenre } from './entities/book-genre.entity';
 import { BookAuthorGuard } from './book-write/guards/book-author.guard';
 import { BookWriteService } from './book-write/book-write.service';
+import { BooksCatalogController } from './book-catalog/book-catalog.controller';
+import { BookStat } from './entities/book-stat.entity';
+import { BookStatService } from './book-stat/book-stat.service';
+import { BookPageRequest } from './entities/book-page-request';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Book, BookSeries, UserBooks, BookPage, BookPart, BookGenre])],
-    controllers: [BookReadController, BookWriteController, BookBasicsController],
+    imports: [
+        TypeOrmModule.forFeature([
+            Book,
+            BookSeries,
+            UserBooks,
+            BookPage,
+            BookPart,
+            BookGenre,
+            BookStat,
+            BookPageRequest,
+        ]),
+    ],
+    controllers: [BookReadController, BookWriteController, BookBasicsController, BooksCatalogController],
     providers: [
         BookBasicsService,
         BookWriteService,
         BookReadService,
         BookCatalogService,
         BooksLibService,
+        BookStatService,
         BookPage,
         BookPart,
         BookAuthorGuard,
