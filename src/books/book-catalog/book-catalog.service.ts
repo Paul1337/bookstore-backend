@@ -23,15 +23,21 @@ export class BookCatalogService {
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
     ) {}
 
-    async search(searchBook: SearchBookDto) {}
+    async search(searchBook: SearchBookDto) {
+        const resultBooks = await this.bookRepository
+            .createQueryBuilder('book')
+            .where('lower(book.title) like lower(%:filterTitle%)', {
+                filterTitle: searchBook.filterTitle ?? '',
+            })
+            .getMany();
+
+        return resultBooks;
+    }
 
     async getTopBooks(
         count: number = this.DefaultBooksCategoryCount,
     ): Promise<GetCategoryBooksResponse> {
-        console.log(
-            `(bookStat.starsCount * ${this.RaitingWeights.stars} + bookStat.viewsCount * ${this.RaitingWeights.views} + bookStat.addsToLibraryCount * ${this.RaitingWeights.lib} + bookStat.readCount * ${this.RaitingWeights.read})`,
-        );
-        return await this.bookRepository
+        const resultBooks = await this.bookRepository
             .createQueryBuilder('book')
             .leftJoinAndSelect('book.bookStat', 'bookStat')
             .where('book.isPublished = true')
@@ -41,23 +47,27 @@ export class BookCatalogService {
             )
             .limit(count)
             .getMany();
+
+        return this.mapBooksResponse(resultBooks);
     }
 
     async getNewBooks(
         count: number = this.DefaultBooksCategoryCount,
     ): Promise<GetCategoryBooksResponse> {
-        return this.bookRepository.find({
+        const resultBooks = await this.bookRepository.find({
             take: count,
             order: { publishedAt: 'DESC' },
             where: { isPublished: true },
             select: ['id', 'title', 'coverSrc', 'publishedAt'],
         });
+
+        return this.mapBooksResponse(resultBooks);
     }
 
     async getRelevantBooks(
         count: number = this.DefaultBooksCategoryCount,
     ): Promise<GetCategoryBooksResponse> {
-        return await this.bookRepository
+        const resultBooks = await this.bookRepository
             .createQueryBuilder('book')
             .leftJoinAndSelect('book.bookStat', 'bookStat')
             .orderBy(
@@ -66,5 +76,15 @@ export class BookCatalogService {
             )
             .limit(count)
             .getMany();
+
+        return this.mapBooksResponse(resultBooks);
+    }
+
+    mapBooksResponse(books: Book[]): GetCategoryBooksResponse {
+        return books.map(book => ({
+            id: book.id,
+            title: book.title,
+            coverSrc: book.coverSrc,
+        }));
     }
 }
