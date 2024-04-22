@@ -46,6 +46,8 @@ export class BookStatService {
                 relations: ['bookStat'],
             });
 
+            if (!book.bookStat?.pagesCount) return;
+
             const pagesRequested = pagesInMemory.length + createPromises.length;
             const readingPart = pagesRequested / book.bookStat.pagesCount;
 
