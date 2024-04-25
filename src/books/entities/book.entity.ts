@@ -59,10 +59,10 @@ export class Book {
     // addsToLibraryCount: number;
 
     @Column({ type: 'varchar', length: 2048, nullable: true })
-    backgroundSrc: string;
+    backgroundSrc?: string;
 
     @Column({ type: 'varchar', length: 2048, nullable: true })
-    coverSrc: string;
+    coverSrc?: string;
 
     @Column({ type: 'int4', default: 0 })
     cost: number;

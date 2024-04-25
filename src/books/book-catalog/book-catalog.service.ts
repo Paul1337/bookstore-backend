@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { UserBooks } from '../entities/user-books.entity';
 import { GetCategoryBooksResponse } from './responses/get-category-books.response';
 import { User } from 'src/users/entities/user.entity';
+import { SearchResponse } from './responses/search.response';
 
 @Injectable()
 export class BookCatalogService {
@@ -17,21 +18,81 @@ export class BookCatalogService {
         read: 50,
     };
     private readonly RelevanceFine = 2;
+    private readonly BooksSearchPageLimit = 4; //50;
 
     constructor(
         @InjectRepository(Book) private bookRepository: Repository<Book>,
         @InjectRepository(UserBooks) private userBooksRepository: Repository<UserBooks>,
     ) {}
 
-    async search(searchBook: SearchBookDto) {
+    async search(searchBook: SearchBookDto): Promise<SearchResponse> {
         const resultBooks = await this.bookRepository
             .createQueryBuilder('book')
-            .where('lower(book.title) like lower(%:filterTitle%)', {
-                filterTitle: searchBook.filterTitle ?? '',
+            .leftJoinAndSelect('book.bookStat', 'bookStat')
+            .leftJoinAndSelect('book.genres', 'genres')
+            .where('LOWER(book.title) LIKE LOWER(:filterTitle)', {
+                filterTitle: `%${searchBook.filters.title ?? ''}%`,
             })
+            .andWhere(searchBook.filters.genres ? 'genres.name IN (:...genres)' : 'TRUE', {
+                genres: searchBook.filters.genres,
+            })
+            .andWhere(searchBook.filters.bookStatus ? 'book.status = :bookStatus' : 'TRUE', {
+                bookStatus: searchBook.filters.bookStatus,
+            })
+            .andWhere(
+                searchBook.filters.price
+                    ? `(book.cost >= :min ${searchBook.filters.price?.min ? 'and book.cost <= :max' : ''})`
+                    : 'TRUE',
+                {
+                    min: searchBook.filters.price?.min ?? 0,
+                    max: searchBook.filters.price?.max,
+                },
+            )
+            .andWhere('book.isPublished = TRUE')
+            .skip((searchBook.page - 1) * this.BooksSearchPageLimit)
+            .take(this.BooksSearchPageLimit)
             .getMany();
 
-        return resultBooks;
+        const { count: booksCount } = await this.bookRepository
+            .createQueryBuilder('book')
+            .leftJoinAndSelect('book.bookStat', 'bookStat')
+            .leftJoinAndSelect('book.genres', 'genres')
+            .select('COUNT(*)', 'count')
+            .where('LOWER(book.title) LIKE LOWER(:filterTitle)', {
+                filterTitle: `%${searchBook.filters.title ?? ''}%`,
+            })
+            .andWhere(searchBook.filters.genres ? 'genres.name IN (:...genres)' : 'TRUE', {
+                genres: searchBook.filters.genres,
+            })
+            .andWhere(searchBook.filters.bookStatus ? 'book.status = :bookStatus' : 'TRUE', {
+                bookStatus: searchBook.filters.bookStatus,
+            })
+            .andWhere(
+                searchBook.filters.price
+                    ? `(book.cost >= :min ${searchBook.filters.price?.min ? 'and book.cost <= :max' : ''})`
+                    : 'TRUE',
+                {
+                    min: searchBook.filters.price?.min ?? 0,
+                    max: searchBook.filters.price?.max,
+                },
+            )
+            .andWhere('book.isPublished = TRUE')
+            .getRawOne();
+
+        return {
+            books: resultBooks.map(book => ({
+                id: book.id,
+                title: book.title,
+                description: book.description,
+                coverSrc: book.coverSrc,
+                bookStat: book.bookStat,
+                genres: book.genres,
+                cost: book.cost,
+                freeChaptersCount: book.freeChaptersCount,
+                status: book.status,
+            })),
+            pagesCount: Math.ceil(Number(booksCount) / this.BooksSearchPageLimit),
+        };
     }
 
     async getTopBooks(

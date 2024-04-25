@@ -1,4 +1,4 @@
-import { IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 import { BookStatus } from 'src/books/enums/book-status.enum';
 
 export enum SortType {
@@ -6,19 +6,28 @@ export enum SortType {
     Raiting = 'raiting',
 }
 
+export class FiltersDto {
+    @IsOptional()
+    title?: string;
+
+    @IsOptional()
+    genres?: string[];
+
+    @IsOptional()
+    bookStatus?: BookStatus;
+
+    @IsOptional()
+    price?: {
+        min: number;
+        max: number;
+    };
+}
+
 export class SearchBookDto {
-    @IsOptional()
-    filterTitle?: string;
+    @ValidateNested()
+    @IsNotEmpty()
+    filters: FiltersDto;
 
-    @IsOptional()
-    genres: string[];
-
-    @IsOptional()
-    bookStatus: BookStatus;
-
-    @IsOptional()
-    costRange: [number, number];
-
-    @IsOptional()
-    sortType: SortType;
+    @IsNotEmpty()
+    page: number;
 }

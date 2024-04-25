@@ -137,6 +137,7 @@ export class BookBasicsService {
     async getMyBooks(userId: number) {
         const books = await this.bookRepository.find({
             where: { authorId: userId },
+            relations: ['bookStat'],
         });
         return books;
     }
