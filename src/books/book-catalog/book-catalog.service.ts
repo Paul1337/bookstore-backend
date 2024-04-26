@@ -41,7 +41,7 @@ export class BookCatalogService {
             })
             .andWhere(
                 searchBook.filters.price
-                    ? `(book.cost >= :min ${searchBook.filters.price?.min ? 'and book.cost <= :max' : ''})`
+                    ? `(book.cost >= :min ${searchBook.filters.price?.max ? 'and book.cost <= :max' : ''})`
                     : 'TRUE',
                 {
                     min: searchBook.filters.price?.min ?? 0,
@@ -57,7 +57,7 @@ export class BookCatalogService {
             .createQueryBuilder('book')
             .leftJoinAndSelect('book.bookStat', 'bookStat')
             .leftJoinAndSelect('book.genres', 'genres')
-            .select('COUNT(*)', 'count')
+            .select('COUNT(DISTINCT book.id)', 'count')
             .where('LOWER(book.title) LIKE LOWER(:filterTitle)', {
                 filterTitle: `%${searchBook.filters.title ?? ''}%`,
             })
@@ -69,7 +69,7 @@ export class BookCatalogService {
             })
             .andWhere(
                 searchBook.filters.price
-                    ? `(book.cost >= :min ${searchBook.filters.price?.min ? 'and book.cost <= :max' : ''})`
+                    ? `(book.cost >= :min ${searchBook.filters.price?.max ? 'and book.cost <= :max' : ''})`
                     : 'TRUE',
                 {
                     min: searchBook.filters.price?.min ?? 0,
@@ -80,7 +80,7 @@ export class BookCatalogService {
             .getRawOne();
 
         return {
-            books: resultBooks.map(book => ({
+            books: resultBooks.map((book) => ({
                 id: book.id,
                 title: book.title,
                 description: book.description,
@@ -142,7 +142,7 @@ export class BookCatalogService {
     }
 
     mapBooksResponse(books: Book[]): GetCategoryBooksResponse {
-        return books.map(book => ({
+        return books.map((book) => ({
             id: book.id,
             title: book.title,
             coverSrc: book.coverSrc,
