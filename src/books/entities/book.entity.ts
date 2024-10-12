@@ -95,9 +95,6 @@ export class Book {
     @Column({ type: 'int4', nullable: true })
     seriesId: number;
 
-    @OneToMany(type => BookPart, part => part.book, { cascade: ['remove'] })
-    bookParts: BookPart[];
-
     @OneToOne(type => BookStat, {
         cascade: ['update', 'insert', 'remove'],
         nullable: true,

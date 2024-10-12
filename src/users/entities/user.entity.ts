@@ -1,60 +1,55 @@
 import { Book } from 'src/books/entities/book.entity';
 import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinColumn,
-    JoinTable,
-    ManyToMany,
-    OneToMany,
-    OneToOne,
-    PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserProfile } from './user-profile.entity';
 import { UserRole } from './user-role.entity';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn({ type: 'int4' })
-    id: number;
+  @PrimaryGeneratedColumn({ type: 'int4' })
+  id: number;
 
-    @Column({ type: 'varchar', nullable: true })
-    googleId: string;
+  @Column({ type: 'varchar', nullable: true })
+  googleId: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @Column({ type: 'varchar', length: 64, default: '' })
-    firstName: string;
+  @Column({ type: 'varchar', length: 64 })
+  email: string;
 
-    @Column({ type: 'varchar', length: 64, default: '' })
-    lastName: string;
+  @Column({ type: 'varchar', length: 64 })
+  username: string;
 
-    @Column({ type: 'varchar', length: 64 })
-    email: string;
+  @Column({ type: 'varchar', length: 1024, nullable: true })
+  password: string;
 
-    @Column({ type: 'varchar', length: 64 })
-    username: string;
+  @JoinTable({ name: 'user_roles' })
+  @ManyToMany(() => UserRole, {
+    eager: true,
+    cascade: ['insert', 'update', 'remove'],
+  })
+  roles: UserRole[];
 
-    @Column({ type: 'varchar', length: 1024, nullable: true })
-    password: string;
+  @Column({ type: 'bool', default: false })
+  isBanned: boolean;
 
-    @JoinTable({ name: 'user_roles' })
-    @ManyToMany(() => UserRole, {
-        eager: true,
-        cascade: ['insert', 'update', 'remove'],
-    })
-    roles: UserRole[];
+  @OneToMany(type => Book, book => book.author)
+  writtenBooks?: Book[];
 
-    @Column({ type: 'bool', default: false })
-    isBanned: boolean;
-
-    @OneToMany(type => Book, book => book.author)
-    writtenBooks?: Book[];
-
-    @OneToOne(type => UserProfile, {
-        cascade: ['update', 'insert', 'remove'],
-    })
-    @JoinColumn()
-    profile: UserProfile;
+  @OneToOne(type => UserProfile, {
+    cascade: ['update', 'insert', 'remove'],
+    eager: true,
+  })
+  @JoinColumn()
+  profile: UserProfile;
 }

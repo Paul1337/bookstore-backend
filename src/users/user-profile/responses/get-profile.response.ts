@@ -5,8 +5,6 @@ import { UserProfile } from '../../entities/user-profile.entity';
 export class GetProfileResponse {
     username: string;
     email: string;
-    firstName: string;
-    lastName: string;
     isBanned: boolean;
     profile: UserProfile;
     roles: Role[];

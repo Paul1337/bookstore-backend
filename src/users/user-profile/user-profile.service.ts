@@ -22,12 +22,10 @@ export class UserProfileService {
         return {
             profile: user.profile,
             email: user.email,
-            firstName: user.firstName,
-            isBanned: user.isBanned,
-            lastName: user.lastName,
             roles: user.roles.map(userRole => userRole.name) as Role[],
             username: user.username,
             writtenBooks: user.writtenBooks,
+            isBanned: user.isBanned,
         };
     }
 
