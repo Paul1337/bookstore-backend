@@ -56,7 +56,7 @@ export class BookWriteController {
     ) {
         return this.bookWriteService.createBook(req.user.id, {
             ...createBookDto,
-            bookCover: bookCover && bookCover.path.substring(bookCover.path.indexOf('/uploads')),
+            bookCover: bookCover && bookCover.path.substring(bookCover.path.indexOf('/static/uploads')),
         });
     }
 
